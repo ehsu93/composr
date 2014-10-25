@@ -20,7 +20,7 @@ public class FrequencyRecorder {
     public void initializeMidiValues() {
         int midiNo = 21;
         while (midiNo < 108) {
-            midiValues.put(NOTES[midiNo-21], FREQUENCIES[midiNo-21]);
+            midiValues.put(FREQUENCIES[midiNo-21], NOTES[midiNo-21]);
         }
     }
 
