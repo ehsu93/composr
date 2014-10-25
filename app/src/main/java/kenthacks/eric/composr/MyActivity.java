@@ -25,6 +25,8 @@ public class MyActivity extends Activity {
 
         final Hashtable MIDI_VALUES = freq.midiValues;      //Initializes MIDI_VALUES to matching notes and frequencies
 
+        Metronome m = new Metronome(70, this);      // start metronome
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 

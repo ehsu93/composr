@@ -21,6 +21,7 @@ public class FrequencyRecorder {
         int midiNo = 21;
         while (midiNo < 108) {
             midiValues.put(NOTES[midiNo-21], FREQUENCIES[midiNo-21]);
+            midiNo++;
         }
     }
 
