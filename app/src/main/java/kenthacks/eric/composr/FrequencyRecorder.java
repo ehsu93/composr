@@ -1,7 +1,7 @@
 package kenthacks.eric.composr;
 
 import java.util.Hashtable;
-
+import java.util.Arrays;
 /**
  * Created by Eric on 10/25/2014.
  */
@@ -91,34 +91,52 @@ public class FrequencyRecorder {
         else return recordedFrequency;
     }
 
+    public class FrequencyArray{
 
-    public void addFrequency(float f) {
-        Node next = new Node(f);
-    }
+        int length;
+        float[] frequencies;
 
-    public class Node {
-        private Node next;
-        private float frequency;
-
-        public Node(float f) {
-           this.frequency = f;
+        public FrequencyArray(int l) {
+            this.length = l;
+            frequencies = new float[this.length];
         }
 
-        public float getFrequency() {
-            return frequency;
+        private void setLength(int l) {
+            this.length = l;
         }
 
-        public void setFrequency(float f) {
-            this.frequency = f;
+        private int addFrequency(float freq) {
+            int index = 0;
+            while(this.frequencies[index] != 0) {
+                index++;
+            }
+            this.frequencies[index] = freq;
+            return index;
         }
 
-        public Node getNext() {
-            return next;
+        private Boolean checkFull(int index) {
+            if (index++ == frequencies.length) {
+                return true;
+            }
+            else return false;
         }
 
-        public void setNext(Node n) {
-            this.next = n;
+        public float addAndGetFreq(float freq) {
+            int index = addFrequency(freq);
+            if(checkFull(index)) {
+                Arrays.sort(this.frequencies);
+                return getMedian();
+            }
+            return -1f;
         }
+
+        private float getMedian() {
+            int lo = 0;
+            int hi = frequencies.length;
+            int mid = lo + (hi - lo)/2;
+            return frequencies[mid];
+        }
+
     }
 
 }
