@@ -18,8 +18,15 @@
 
     <Button
         android:id = "@+id/Toggle"
-        android:text="@string/Toggle"
+        android:text="Toggle Metronome"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
+
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Write Frequencies"
+        android:id="@+id/frequencies"
+        android:layout_gravity="center_horizontal" />
 
 </LinearLayout>

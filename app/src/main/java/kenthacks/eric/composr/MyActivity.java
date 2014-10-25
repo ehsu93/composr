@@ -21,7 +21,7 @@ public class MyActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final FrequencyRecorder FREQ = new FrequencyRecorder();
+        final FrequencyRecorder FREQ = new FrequencyRecorder(this);
 
         FREQ.initializeMidiValues();
 
@@ -30,14 +30,19 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
-        final Button button = (Button) findViewById(R.id.Toggle);
-        button.setOnClickListener(new View.OnClickListener() {
+        final Button metronomeButton = (Button) findViewById(R.id.Toggle);
+        metronomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 m.toggleMetronome();
             }
         });
 
-
+        final Button recordButton = (Button) findViewById(R.id.frequencies);
+        recordButton.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                //FREQ.writeFrequencies(); not working yet
+            }
+        });
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
@@ -46,6 +51,9 @@ public class MyActivity extends Activity {
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
                 final float pitchInHz = pitchDetectionResult.getPitch();
                 final String note = FREQ.getNoteFromFrequency(pitchInHz);
+
+                FREQ.addToFrequencyArray(pitchInHz);
+
                 runOnUiThread((Runnable) new Runnable() {
                     @Override
                     public void run() {
