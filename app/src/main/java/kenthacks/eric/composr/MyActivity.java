@@ -13,10 +13,18 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
+import org.apache.xalan.xsltc.runtime.Hashtable;
+
 public class MyActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+        FrequencyRecorder freq = new FrequencyRecorder();
+
+        freq.initializeMidiValues();
+
+        final Hashtable MIDI_VALUES = freq.midiValues;      //Initializes MIDI_VALUES to matching notes and frequencies
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 

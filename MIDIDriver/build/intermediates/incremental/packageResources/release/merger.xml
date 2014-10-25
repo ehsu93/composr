@@ -2,18 +2,18 @@
 <merger version="2" >
 
     <dataSet config="main" >
-        <source path="/private/var/root/Desktop/composr/MIDIDriver/res" >
+        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\res" >
             <file
                 name="device_filter"
-                path="/private/var/root/Desktop/composr/MIDIDriver/res/xml/device_filter.xml"
+                path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\res\xml\device_filter.xml"
                 qualifiers=""
                 type="xml" />
         </source>
-        <source path="/private/var/root/Desktop/composr/MIDIDriver/build/generated/res/rs/release" />
-        <source path="/private/var/root/Desktop/composr/MIDIDriver/build/generated/res/generated/release" />
+        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\build\generated\res\rs\release" />
+        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\build\generated\res\generated\release" />
     </dataSet>
     <dataSet config="release" >
-        <source path="/private/var/root/Desktop/composr/MIDIDriver/build-types/release/res" />
+        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\build-types\release\res" />
     </dataSet>
 
 </merger>
