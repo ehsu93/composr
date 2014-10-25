@@ -4,10 +4,14 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
 
-import org.jfugue.Player;
-
-import jp.kshoji.javax.sound.midi.MidiSystem;
+import be.tarsos.dsp.AudioDispatcher;
+import be.tarsos.dsp.AudioEvent;
+import be.tarsos.dsp.io.android.AudioDispatcherFactory;
+import be.tarsos.dsp.pitch.PitchDetectionHandler;
+import be.tarsos.dsp.pitch.PitchDetectionResult;
+import be.tarsos.dsp.pitch.PitchProcessor;
 
 public class MyActivity extends Activity {
 
@@ -15,9 +19,23 @@ public class MyActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
-        MidiSystem.initialize(this);
-        Player player = new Player();
-        player.play("A B C D E F G");
+
+        AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
+
+        dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
+            @Override
+            public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
+                final float pitchInHz = pitchDetectionResult.getPitch();
+                runOnUiThread((Runnable) new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView text = (TextView) findViewById(R.id.textView1);
+                        text.setText("" + pitchInHz);
+                    }
+                });
+            }
+        }));
+        new Thread(dispatcher, "Audio Dispatcher").start();
     }
 
 

@@ -15,4 +15,4 @@
     <usb-device vendor-id="0944" />
     <!-- CME -->
     <usb-device vendor-id="9615" />
-</resources><!-- From: file:/C:/Users/Eric/workspace/composr-master/MIDIDriver/res/xml/device_filter.xml -->
+</resources><!-- From: file:/C:/Users/Eric/Documents/GitHub/composr/MIDIDriver/res/xml/device_filter.xml -->
