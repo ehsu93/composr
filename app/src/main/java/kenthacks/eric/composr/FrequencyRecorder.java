@@ -1,5 +1,13 @@
 package kenthacks.eric.composr;
 
+import android.os.Environment;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.util.Hashtable;
 import java.util.Arrays;
 import java.io.File;
@@ -159,6 +167,36 @@ public class FrequencyRecorder {
             int hi = frequencies.length;
             int mid = lo + (hi - lo)/2;
             return frequencies[mid];
+        }
+        public void saveArray(float[] freq) {
+            StringBuilder data = new StringBuilder("");
+            int iterator = 0;
+            while(iterator < freq.length) {
+                data.append("" + freq[iterator]);
+                iterator ++;
+            }
+
+            String finalData = data.toString();
+
+
+            String root = Environment.getExternalStorageDirectory().toString();
+            File myDir = new File(root + "/composrFiles");
+            myDir.mkdirs();
+            String fname = "FrequencyList.txt";
+            File file = new File(myDir, fname);
+            if(file.exists()) file.delete();
+            try {
+                FileOutputStream fOut = new FileOutputStream(file);
+                PrintWriter printWriter = new PrintWriter(fOut);
+                printWriter.println(finalData);
+                printWriter.flush();
+                printWriter.close();
+                fOut.close();
+            } catch(FileNotFoundException e) {
+                e.printStackTrace();
+            } catch(IOException e) {
+                e.printStackTrace();
+            }
         }
 
     }
