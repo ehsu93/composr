@@ -19,11 +19,9 @@ public class MyActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        FrequencyRecorder freq = new FrequencyRecorder();
+        final FrequencyRecorder FREQ = new FrequencyRecorder();
 
-        freq.initializeMidiValues();
-
-        final Hashtable<Float, String> MIDI_VALUES = freq.midiValues;      //Initializes MIDI_VALUES to matching notes and frequencies
+        FREQ.initializeMidiValues();
 
         Metronome m = new Metronome(70, this);      // start metronome
 
@@ -36,11 +34,12 @@ public class MyActivity extends Activity {
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
                 final float pitchInHz = pitchDetectionResult.getPitch();
+                final String note = FREQ.getNoteFromFrequency(pitchInHz);
                 runOnUiThread((Runnable) new Runnable() {
                     @Override
                     public void run() {
                         TextView text = (TextView) findViewById(R.id.textView1);
-                        text.setText("" + pitchInHz);
+                        text.setText("" + pitchInHz + "\n" + note);
                     }
                 });
             }
