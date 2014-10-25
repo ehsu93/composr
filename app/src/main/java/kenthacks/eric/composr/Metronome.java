@@ -14,30 +14,45 @@ import android.content.Context;
 public class Metronome {
 
     int tempo;
-    Boolean sound = false;
+    MediaPlayer m;
+    Boolean sound = true;
     Timer timer = new Timer();
+    TimerTask task;
 
-    public Metronome(int tempo, Context c){
+    public Metronome(int tempo, Context ctx){
         this.tempo = tempo;
+        this.m = MediaPlayer.create(ctx, R.raw.tick);
+        this.startMetronome();
+    }
 
-        final MediaPlayer m = MediaPlayer.create(c, R.raw.tick);
-
-        TimerTask task = new TimerTask() {
-
+    public void createTimerTask(){
+        this.task = new TimerTask(){
             @Override
             public void run() {
                 m.start();
             }
-
         };
-
-        timer.schedule(task, new Date(), 60000/tempo);
     }
 
+    public void startMetronome(){
+        this.timer = new Timer();
+        createTimerTask();
+        this.timer.schedule(this.task, new Date(), 60000/this.tempo);
+    }
 
+    public void cancelMetronome(){
+        this.timer.cancel();
+        this.timer.purge();
+    }
 
     public void toggleMetronome() {
         this.sound = !this.sound;
+        if (this.sound) {
+            startMetronome();
+        }
+        else {
+            cancelMetronome();
+        }
     }
 
 
