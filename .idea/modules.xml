@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+      <module fileurl="file://$PROJECT_DIR$/composr.iml" filepath="$PROJECT_DIR$/composr.iml" />
+      <module fileurl="file://$PROJECT_DIR$/jfugue-android/jfugue-android.iml" filepath="$PROJECT_DIR$/jfugue-android/jfugue-android.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mod_xalan/mod_xalan.iml" filepath="$PROJECT_DIR$/mod_xalan/mod_xalan.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mod_xerces/mod_xerces.iml" filepath="$PROJECT_DIR$/mod_xerces/mod_xerces.iml" />
+      <module fileurl="file://$PROJECT_DIR$/mod_xmlapis/mod_xmlapis.iml" filepath="$PROJECT_DIR$/mod_xmlapis/mod_xmlapis.iml" />
+    </modules>
+  </component>
+</project>
+
