@@ -7,6 +7,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.util.Log;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
@@ -22,11 +23,8 @@ public class MyActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         final FrequencyRecorder FREQ = new FrequencyRecorder(this);
-
         FREQ.initializeMidiValues();
-
         final Metronome m = new Metronome(70, this);      // start metronome
-
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
@@ -40,11 +38,13 @@ public class MyActivity extends Activity {
         final Button recordButton = (Button) findViewById(R.id.frequencies);
         recordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                //FREQ.writeFrequencies(); not working yet
+                //FREQ.logFrequencies();
             }
         });
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
+
+        RecordingTask rt = new RecordingTask(this);
 
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
             @Override
@@ -52,7 +52,7 @@ public class MyActivity extends Activity {
                 final float pitchInHz = pitchDetectionResult.getPitch();
                 final String note = FREQ.getNoteFromFrequency(pitchInHz);
 
-                FREQ.addToFrequencyArray(pitchInHz);
+                rt.FREQ.addToFrequencyArray(pitchInHz);
 
                 runOnUiThread((Runnable) new Runnable() {
                     @Override

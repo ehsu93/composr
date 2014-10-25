@@ -33,10 +33,15 @@ public class Metronome {
         };
     }
 
-    public void startMetronome(){
+    void playTick(){
+        m.start();
+    }
+
+    public TimerTask startMetronome(){
         this.timer = new Timer();
         createTimerTask();
         this.timer.schedule(this.task, new Date(), 60000/this.tempo);
+        return this.task;
     }
 
     public void cancelMetronome(){
