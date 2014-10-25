@@ -5,6 +5,10 @@ import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
+import org.jfugue.Player;
+
+import jp.kshoji.javax.sound.midi.MidiSystem;
+
 public class MyActivity extends Activity {
 
     @Override
@@ -12,6 +16,8 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
         MidiSystem.initialize(this);
+        Player player = new Player();
+        player.play("A B C D E F G");
     }
 
 

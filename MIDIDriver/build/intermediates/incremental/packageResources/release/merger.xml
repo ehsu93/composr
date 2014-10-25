@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merger version="2" >
+
+    <dataSet config="main" >
+        <source path="C:\Users\Eric\workspace\composr-master\MIDIDriver\res" >
+            <file
+                name="device_filter"
+                path="C:\Users\Eric\workspace\composr-master\MIDIDriver\res\xml\device_filter.xml"
+                qualifiers=""
+                type="xml" />
+        </source>
+        <source path="C:\Users\Eric\workspace\composr-master\MIDIDriver\build\generated\res\rs\release" />
+        <source path="C:\Users\Eric\workspace\composr-master\MIDIDriver\build\generated\res\generated\release" />
+    </dataSet>
+    <dataSet config="release" >
+        <source path="C:\Users\Eric\workspace\composr-master\MIDIDriver\build-types\release\res" />
+    </dataSet>
+
+</merger>
