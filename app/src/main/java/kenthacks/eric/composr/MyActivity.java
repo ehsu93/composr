@@ -4,6 +4,8 @@ import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import be.tarsos.dsp.AudioDispatcher;
@@ -23,10 +25,19 @@ public class MyActivity extends Activity {
 
         FREQ.initializeMidiValues();
 
-        Metronome m = new Metronome(70, this);      // start metronome
+        final Metronome m = new Metronome(70, this);      // start metronome
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
+
+        final Button button = (Button) findViewById(R.id.Toggle);
+        button.setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                m.toggleMetronome();
+            }
+        });
+
+
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 

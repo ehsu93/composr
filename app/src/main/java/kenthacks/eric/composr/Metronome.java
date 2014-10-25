@@ -14,6 +14,7 @@ import android.content.Context;
 public class Metronome {
 
     int tempo;
+    Boolean sound = false;
     Timer timer = new Timer();
 
     public Metronome(int tempo, Context c){
@@ -31,6 +32,12 @@ public class Metronome {
         };
 
         timer.schedule(task, new Date(), 60000/tempo);
+    }
+
+
+
+    public void toggleMetronome() {
+        this.sound = !this.sound;
     }
 
 
