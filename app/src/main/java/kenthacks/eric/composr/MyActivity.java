@@ -13,7 +13,7 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
-import org.apache.xalan.xsltc.runtime.Hashtable;
+import java.util.Hashtable;
 
 public class MyActivity extends Activity {
 
@@ -23,7 +23,7 @@ public class MyActivity extends Activity {
 
         freq.initializeMidiValues();
 
-        final Hashtable MIDI_VALUES = freq.midiValues;      //Initializes MIDI_VALUES to matching notes and frequencies
+        final Hashtable<Float, String> MIDI_VALUES = freq.midiValues;      //Initializes MIDI_VALUES to matching notes and frequencies
 
         Metronome m = new Metronome(70, this);      // start metronome
 
