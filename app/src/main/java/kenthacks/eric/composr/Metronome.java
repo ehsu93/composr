@@ -15,14 +15,13 @@ public class Metronome {
 
     int tempo;
     MediaPlayer m;
-    Boolean sound = true;
+    Boolean sound = false;
     Timer timer = new Timer();
     TimerTask task;
 
     public Metronome(int tempo, Context ctx){
         this.tempo = tempo;
         this.m = MediaPlayer.create(ctx, R.raw.tick);
-        this.startMetronome();
     }
 
     public void createTimerTask(){
