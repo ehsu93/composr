@@ -29,12 +29,12 @@ import static android.widget.Toast.makeText;
 public class MyActivity extends Activity {
 
     private static final String DNAME = "/composr_files";
-    int index;
+    int index = 0;
+    StringBuilder finalPattern = new StringBuilder("");
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
-        index = 0;
 
         File rootPath = new File(Environment.getExternalStorageDirectory() + DNAME);
         boolean success = true;
@@ -81,9 +81,16 @@ public class MyActivity extends Activity {
                     FREQ.fArray.frequencies[index] = pitchInHz[0];
                     index++;
                 }
-                final float[] median = new float[1];
-                if(index >= FREQ.fArray.frequencies.length) median[0] = FREQ.getMedian();
 
+                final float[] median = new float[1];
+                median[0] = 101f;
+                if(index >= FREQ.fArray.frequencies.length) {
+                    if(median[0] > 100) {
+                        median[0] = FREQ.getMedian();
+                        finalPattern.append(" ").append(FREQ.getNoteFromFrequency(median[0]));
+                    }
+                    index = 0;
+                }
 
                 runOnUiThread((Runnable) new Runnable() {
                     @Override
@@ -98,6 +105,9 @@ public class MyActivity extends Activity {
                         }
                         if(index >= FREQ.fArray.frequencies.length) {
                             text3.setText("" + median[0] + "\n" + FREQ.getNoteFromFrequency(median[0]));
+                        }
+                        if(median[0] == -1) {
+                            text3.setText("" + finalPattern.toString());
                         }
 
                     }
