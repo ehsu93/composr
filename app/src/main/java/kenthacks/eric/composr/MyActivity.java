@@ -2,12 +2,16 @@ package kenthacks.eric.composr;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Environment;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.util.Log;
+import android.widget.Toast;
+
+import org.jfugue.Pattern;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
@@ -16,17 +20,30 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.Hashtable;
 
 public class MyActivity extends Activity {
 
+    private static final String DNAME = "/composr_files";
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        File rootPath = new File(Environment.getExternalStorageDirectory() + DNAME);
+        boolean success = true;
+        if(!rootPath.exists()) {
+            rootPath.mkdir();
+        }
+
+
         final FrequencyRecorder FREQ = new FrequencyRecorder(this);
         FREQ.initializeMidiValues();
         final Metronome m = new Metronome(70, this);      // start metronome
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
+
 
         final Button metronomeButton = (Button) findViewById(R.id.Toggle);
         metronomeButton.setOnClickListener(new View.OnClickListener() {
