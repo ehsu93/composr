@@ -44,7 +44,7 @@ public class MyActivity extends Activity {
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
-        RecordingTask rt = new RecordingTask(this);
+        final RecordingTask rt = new RecordingTask(this);
 
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
             @Override
@@ -52,7 +52,7 @@ public class MyActivity extends Activity {
                 final float pitchInHz = pitchDetectionResult.getPitch();
                 final String note = FREQ.getNoteFromFrequency(pitchInHz);
 
-                rt.FREQ.addToFrequencyArray(pitchInHz);
+  //              rt.FREQ.addToFrequencyArray(pitchInHz);
 
                 runOnUiThread((Runnable) new Runnable() {
                     @Override
