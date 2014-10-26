@@ -69,7 +69,7 @@ public class FrequencyRecorder {
         float diff1;
         float diff2;
 
-        if(index <= 5) {
+        if(index <= 2) {
             return -1f;
         }
         if(index >=86) {
@@ -87,12 +87,12 @@ public class FrequencyRecorder {
         }
         else if (closeFrequency1 > recordedFrequency) {
             closeFrequency2 = FREQUENCIES[index - 1];
-            diff1 = recordedFrequency - closeFrequency1;
-            diff2 = closeFrequency2 - recordedFrequency;
+            diff1 = closeFrequency1 - recordedFrequency;
+            diff2 = recordedFrequency - closeFrequency2;
             if(diff1 < diff2) {
-                return FREQUENCIES[index-1];
+                return FREQUENCIES[index];
             }
-            else return FREQUENCIES[index-2];
+            else return FREQUENCIES[index-1];
         }
         else return recordedFrequency;
     }
