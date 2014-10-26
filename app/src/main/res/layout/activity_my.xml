@@ -35,6 +35,13 @@
         android:text="Log Frequencies"
         android:id="@+id/frequencies"
         android:layout_gravity="center_horizontal" />
+
+    <Button
+        android:id="@+id/makeMusic"
+        android:text="Generate Sheet Music"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
     <TextView
         android:id = "@+id/frequencyArray"
         android:text="0"

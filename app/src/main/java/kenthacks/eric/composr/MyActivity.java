@@ -1,6 +1,7 @@
 package kenthacks.eric.composr;
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.Bundle;
 import android.os.Environment;
 import android.view.Menu;
@@ -8,6 +9,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import org.jfugue.Pattern;
 
@@ -19,6 +21,7 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
 import java.io.File;
+import java.io.IOException;
 
 import static android.widget.Toast.makeText;
 
@@ -26,10 +29,12 @@ public class MyActivity extends Activity {
 
     private static final String DNAME = "/composr_files";
     RecordingTask rt;
+    Context mContext = this;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        File rootPath = new File(Environment.getExternalStorageDirectory() + DNAME);
+        File sdCard = Environment.getExternalStorageDirectory();
+        File rootPath = new File(sdCard.getAbsolutePath() + DNAME);
         if(!rootPath.exists()) {
             rootPath.mkdir();
         }
@@ -38,11 +43,24 @@ public class MyActivity extends Activity {
         setContentView(R.layout.activity_my);
 
         rt = new RecordingTask(60, this);
+        final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
 
         final Button metronomeButton = (Button) findViewById(R.id.Toggle);
         metronomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 rt.toggle();
+            }
+        });
+        final Button musicButton = (Button) findViewById(R.id.makeMusic);
+        musicButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
+                try {
+                    pa.write(rt.pattern, "example");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
         });
 
