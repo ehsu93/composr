@@ -24,7 +24,7 @@ public class PatternToMUSICXML {
 
         String musicXMLTitle = givenName; //"givenName" from text field where it prompts user for name of output file. must be filled.
 
-        FileOutputStream file = c.openFileOutput(musicXMLTitle + ".xml", 0);
+        FileOutputStream file = c.openFileOutput(musicXMLTitle + ".xml", Context.MODE_PRIVATE);
 
         MusicXmlRenderer renderer = new MusicXmlRenderer();
         MusicStringParser parser = new MusicStringParser();

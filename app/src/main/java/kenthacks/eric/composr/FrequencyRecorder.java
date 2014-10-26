@@ -11,6 +11,7 @@ import java.lang.System;
 public class FrequencyRecorder {
 
     private Hashtable<Float, String> midiValues = new Hashtable<Float, String>();
+    private int index = 0;
 
     public FrequencyArray fArray = new FrequencyArray(100000);
     private Context ctx;
@@ -98,7 +99,9 @@ public class FrequencyRecorder {
     }
 
     public void addToFrequencyArray(float freq){
-        fArray.addAndGetFreq(freq);
+        if(this.index < fArray.frequencies.length)
+            fArray.addFrequency(freq);
+//        if(fArray.addAndGetFreq(freq) != -1f) return;
     }
 
     public class FrequencyArray{
@@ -119,7 +122,7 @@ public class FrequencyRecorder {
             return ret;
         }
 
-        private int addFrequency(float freq) {
+        public int addFrequency(float freq) {
             int index = 0;
             while(this.frequencies[index] != 0) {
                 index++;
@@ -139,13 +142,14 @@ public class FrequencyRecorder {
         public float addAndGetFreq(float freq) {
             int index = addFrequency(freq);
 
-            /*
+
             if(checkFull(index)) {
-                float[] prev_frequencies = this.frequencies;
-                this.frequencies = new float[this.length];
-                Arrays.sort(prev_frequencies);
-                return getMedian();
-            }*/
+//                float[] prev_frequencies = this.frequencies;
+//                this.frequencies = new float[this.length];
+//                Arrays.sort(prev_frequencies);
+//                return getMedian();
+                return 1f;
+            }
             return -1f;
         }
 

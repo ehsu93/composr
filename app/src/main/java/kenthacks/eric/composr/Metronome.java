@@ -29,4 +29,7 @@ public class Metronome {
     void playTick(){
         m.start();
     }
+    void toggleMetronome() {
+
+    }
 }

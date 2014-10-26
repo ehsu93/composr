@@ -24,6 +24,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Hashtable;
 
+import static android.widget.Toast.makeText;
+
 public class MyActivity extends Activity {
 
     private static final String DNAME = "/composr_files";
@@ -39,16 +41,19 @@ public class MyActivity extends Activity {
 
 
         final FrequencyRecorder FREQ = new FrequencyRecorder(this);
+        FrequencyRecorder freq = new FrequencyRecorder(this);
         FREQ.initializeMidiValues();
         final Metronome m = new Metronome(70, this);      // start metronome
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
 
+        final RecordingTask rt = new RecordingTask(60, this);
+
         final Button metronomeButton = (Button) findViewById(R.id.Toggle);
         metronomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                m.toggleMetronome();
+                rt.toggle();
             }
         });
 
@@ -61,7 +66,6 @@ public class MyActivity extends Activity {
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
-        final RecordingTask rt = new RecordingTask(this);
 
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
             @Override
@@ -69,17 +73,25 @@ public class MyActivity extends Activity {
                 final float pitchInHz = pitchDetectionResult.getPitch();
                 final String note = FREQ.getNoteFromFrequency(pitchInHz);
 
-  //              rt.FREQ.addToFrequencyArray(pitchInHz);
-
+                FREQ.addToFrequencyArray(pitchInHz);
                 runOnUiThread((Runnable) new Runnable() {
                     @Override
                     public void run() {
-                        TextView text = (TextView) findViewById(R.id.textView1);
-                        text.setText("" + pitchInHz + "\n" + note);
+                        TextView text = (TextView) findViewById(R.id.Pitch);
+                        text.setText("" + pitchInHz);
+                        TextView text2 = (TextView) findViewById(R.id.Note);
+                        text2.setText("" + note);
+
                     }
                 });
-            }
+           }
         }));
+        Toast.makeText(getApplicationContext(), "" + FREQ.fArray.frequencies[0], Toast.LENGTH_LONG).show();
+
+        TextView text = (TextView) findViewById(R.id.Pitch);
+
+//        freq.addToFrequencyArray(Float.parseFloat(text.getText().toString()));
+
         new Thread(dispatcher, "Audio Dispatcher").start();
     }
 

@@ -10,10 +10,17 @@
     tools:context=".MyActivity">
 
     <TextView
-        android:id = "@+id/textView1"
+        android:id = "@+id/Pitch"
         android:text="@string/hello_world"
         android:layout_width="match_parent"
         android:gravity="center"
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id ="@+id/Note"
+        android:text="NULL"
+        android:gravity="center"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
     <Button

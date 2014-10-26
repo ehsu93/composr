@@ -2,10 +2,10 @@
 <merger version="2" >
 
     <dataSet config="main" >
-        <source path="/private/var/root/Desktop/composr/MIDIDriver/assets" />
+        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\assets" />
     </dataSet>
     <dataSet config="debug" >
-        <source path="/private/var/root/Desktop/composr/MIDIDriver/build-types/debug/assets" />
+        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\build-types\debug\assets" />
     </dataSet>
 
 </merger>
