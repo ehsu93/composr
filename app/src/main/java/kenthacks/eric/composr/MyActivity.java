@@ -48,6 +48,12 @@ public class MyActivity extends Activity {
         final Button metronomeButton = (Button) findViewById(R.id.Toggle);
         metronomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                String buttonText = metronomeButton.getText().toString();
+                if (buttonText == "Stop Listening")
+                    metronomeButton.setText("Listen");
+                else {
+                    metronomeButton.setText("Stop Listening");
+                }
                 rt.toggle();
             }
         });
@@ -81,6 +87,10 @@ public class MyActivity extends Activity {
                         text.setText("" + pitchInHz);
                         TextView text2 = (TextView) findViewById(R.id.Note);
                         text2.setText("" + note);
+
+                        TextView text3 = (TextView) findViewById(R.id.frequencyArray);
+                        String newtext = rt.displayPattern;
+                        text3.setText(newtext);
                     }
                 });
            }

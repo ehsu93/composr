@@ -7,7 +7,8 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context=".MyActivity">
+    tools:context=".MyActivity"
+    android:weightSum="1">
 
     <TextView
         android:id = "@+id/Pitch"
@@ -25,16 +26,9 @@
 
     <Button
         android:id = "@+id/Toggle"
-        android:text="Toggle Metronome"
+        android:text="Listen"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Log Frequencies"
-        android:id="@+id/frequencies"
-        android:layout_gravity="center_horizontal" />
 
     <Button
         android:id="@+id/makeMusic"
@@ -46,6 +40,8 @@
         android:id = "@+id/frequencyArray"
         android:text="0"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:textSize="30dp"
+        android:layout_weight="0.26" />
 
 </LinearLayout>
