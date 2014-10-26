@@ -19,46 +19,14 @@ public class Metronome {
     Timer timer = new Timer();
     TimerTask task;
 
+    // metronome must be initialized to work
     public Metronome(int tempo, Context ctx){
         this.tempo = tempo;
         this.m = MediaPlayer.create(ctx, R.raw.tick);
     }
 
-    public void createTimerTask(){
-        this.task = new TimerTask(){
-            @Override
-            public void run() {
-                m.start();
-            }
-        };
-    }
-
+    // play the ticking sound
     void playTick(){
         m.start();
     }
-
-    public TimerTask startMetronome(){
-        this.timer = new Timer();
-        createTimerTask();
-        this.timer.schedule(this.task, new Date(), 60000/this.tempo);
-        return this.task;
-    }
-
-    public void cancelMetronome(){
-        this.timer.cancel();
-        this.timer.purge();
-    }
-
-    public void toggleMetronome() {
-        this.sound = !this.sound;
-        if (this.sound) {
-            startMetronome();
-        }
-        else {
-            cancelMetronome();
-        }
-    }
-
-
-
 }

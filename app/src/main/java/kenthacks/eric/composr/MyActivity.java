@@ -22,36 +22,27 @@ public class MyActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        final FrequencyRecorder FREQ = new FrequencyRecorder(this);
-        FREQ.initializeMidiValues();
-        final Metronome m = new Metronome(70, this);      // start metronome
+        final RecordingTask rt = new RecordingTask(50, this);
+        rt.FREQ.initializeMidiValues();
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
         final Button metronomeButton = (Button) findViewById(R.id.Toggle);
         metronomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                m.toggleMetronome();
-            }
-        });
-
-        final Button recordButton = (Button) findViewById(R.id.frequencies);
-        recordButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                //FREQ.logFrequencies();
+                rt.toggle();
             }
         });
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
-        RecordingTask rt = new RecordingTask(this);
-
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
                 final float pitchInHz = pitchDetectionResult.getPitch();
-                final String note = FREQ.getNoteFromFrequency(pitchInHz);
+                final String note = rt.FREQ.getNoteFromFrequency(pitchInHz);
 
+                // Log.i("Note name", note);
                 rt.FREQ.addToFrequencyArray(pitchInHz);
 
                 runOnUiThread((Runnable) new Runnable() {

@@ -12,28 +12,34 @@ import android.content.Context;
  */
 public class RecordingTask {
 
-    Timer timer;
-    TimerTask task;
-    boolean recording;
-    Metronome m;
+    // set in the constructor
+    int tempo;
+    Metronome metronome;
     Context ctx;
     FrequencyRecorder FREQ;
-    FrequencyRecorder.FrequencyArray ARR;
 
-    public RecordingTask(Context ctx){
-        this.timer = new Timer();
-        this.task = createTimerTask();
-        this.m = new Metronome(60, ctx);
+    // set elsewhere
+    Timer timer;
+    TimerTask task;
+    boolean recording = false;
+
+    public RecordingTask(int tempo, Context ctx){
+        this.tempo = tempo;
+        this.metronome = new Metronome(tempo, ctx);
         this.ctx = ctx;
+        this.FREQ = new FrequencyRecorder(ctx);
     }
 
     TimerTask createTimerTask(){
         task = new TimerTask(){
             @Override
             public void run() {
-                float last_freq = ARR.reset();
-                Log.i("MEDIAN FREQ", "------------" + String.valueOf(last_freq) + "--------------");
-                m.playTick();
+                float[] last_freq = FREQ.fArray.frequencies;
+                Log.i("tick", "tick");
+                float median = FREQ.fArray.getMedian(last_freq);
+                FREQ.fArray.reset();
+                Log.i("MEDIAN FREQ", "------------" + String.valueOf(median) + "--------------");
+                metronome.playTick();
             }
         };
         return task;
@@ -41,6 +47,16 @@ public class RecordingTask {
 
     void toggle(){
         this.recording = !this.recording;
+        Log.i("rt_state", String.valueOf(this.recording));
+        if (this.recording){
+            this.timer = new Timer();
+            this.task = createTimerTask();
+            this.timer.schedule(this.task, new Date(), 60000/tempo);
+        }
+        else {
+            timer.cancel();
+            timer.purge();
+        }
     }
 
 }

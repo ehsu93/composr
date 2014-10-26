@@ -101,10 +101,6 @@ public class FrequencyRecorder {
         fArray.addAndGetFreq(freq);
     }
 
-    public void logFrequencies(){
-        Log.i("frequencies", fArray.toString());
-    }
-
     public class FrequencyArray{
 
         int length;
@@ -139,26 +135,22 @@ public class FrequencyRecorder {
             else return false;
         }
 
+
         public float addAndGetFreq(float freq) {
             int index = addFrequency(freq);
-            Log.i("freq", String.valueOf(freq));
 
+            /*
             if(checkFull(index)) {
                 float[] prev_frequencies = this.frequencies;
                 this.frequencies = new float[this.length];
                 Arrays.sort(prev_frequencies);
                 return getMedian();
-            }
+            }*/
             return -1f;
         }
 
-        public float reset(){
-            float median = getMedian();
-            this.frequencies = new float[length];
-            return median;
-        }
-
-        private float[] cleanFreqs(){
+        /*
+        public float[] cleanFreqs(){
             int j = 0;
             for( int i=0;  i<this.frequencies.length;  i++ ) {
                 if (this.frequencies[i] != 0 && this.frequencies[i] != -1.0)
@@ -167,10 +159,15 @@ public class FrequencyRecorder {
             float [] newArray = new float[j];
             Arrays.copyOf(this.frequencies, j);
             return newArray;
+        }*/
+
+        public void reset(){
+            this.frequencies = new float[this.length];
         }
 
-        public float getMedian() {
-            float[] freqs = cleanFreqs();
+        public float getMedian(float[] freqs) {
+            if (freqs.length == 0)
+                return 0;
             int lo = 0;
             int hi = freqs.length;
             int mid = lo + (hi - lo)/2;
