@@ -30,6 +30,14 @@ public class FrequencyRecorder {
         }
     }
 
+    public float getMedian() {
+        Arrays.sort(this.fArray.frequencies);
+        int lo = 0;
+        int hi = 100;
+        int mid = lo + (hi - lo)/2;
+        return this.fArray.frequencies[mid];
+    }
+
     //Binary search that takes recordedFrequency, and returns smaller/larger frequency closest to recordedFrequency
     public int findNearestFrequency(Float recordedFrequency) {
         return bin_search(recordedFrequency, 0, FREQUENCIES.length-1);

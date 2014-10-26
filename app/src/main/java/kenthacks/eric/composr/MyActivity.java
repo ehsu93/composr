@@ -81,7 +81,10 @@ public class MyActivity extends Activity {
                     FREQ.fArray.frequencies[index] = pitchInHz[0];
                     index++;
                 }
-                
+                final float[] median = new float[1];
+                if(index >= FREQ.fArray.frequencies.length) median[0] = FREQ.getMedian();
+
+
                 runOnUiThread((Runnable) new Runnable() {
                     @Override
                     public void run() {
@@ -92,6 +95,9 @@ public class MyActivity extends Activity {
                         TextView text3 = (TextView) findViewById(R.id.frequencyArray);
                         if(index != 0) {
                             text3.setText("" + FREQ.fArray.frequencies[index - 1] + "\n" + index);
+                        }
+                        if(index >= FREQ.fArray.frequencies.length) {
+                            text3.setText("" + median[0] + "\n" + FREQ.getNoteFromFrequency(median[0]));
                         }
 
                     }
