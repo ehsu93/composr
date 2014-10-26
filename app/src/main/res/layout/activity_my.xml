@@ -35,5 +35,10 @@
         android:text="Log Frequencies"
         android:id="@+id/frequencies"
         android:layout_gravity="center_horizontal" />
+    <TextView
+        android:id = "@+id/frequencyArray"
+        android:text="0"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
 
 </LinearLayout>

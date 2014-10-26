@@ -29,9 +29,12 @@ import static android.widget.Toast.makeText;
 public class MyActivity extends Activity {
 
     private static final String DNAME = "/composr_files";
+    int index;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
+        index = 0;
 
         File rootPath = new File(Environment.getExternalStorageDirectory() + DNAME);
         boolean success = true;
@@ -66,27 +69,38 @@ public class MyActivity extends Activity {
 
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
+        final Float[] result = new Float[1];
 
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
-                final float pitchInHz = pitchDetectionResult.getPitch();
-                final String note = FREQ.getNoteFromFrequency(pitchInHz);
-
-                FREQ.addToFrequencyArray(pitchInHz);
+                final float[] pitchInHz = {pitchDetectionResult.getPitch()};
+                result[0] = pitchInHz[0];
+                final String note = FREQ.getNoteFromFrequency(pitchInHz[0]);
+                if(index < FREQ.fArray.frequencies.length) {
+                    FREQ.fArray.frequencies[index] = pitchInHz[0];
+                    index++;
+                }
+                
                 runOnUiThread((Runnable) new Runnable() {
                     @Override
                     public void run() {
                         TextView text = (TextView) findViewById(R.id.Pitch);
-                        text.setText("" + pitchInHz);
+                        text.setText("" + result[0]);
                         TextView text2 = (TextView) findViewById(R.id.Note);
                         text2.setText("" + note);
+                        TextView text3 = (TextView) findViewById(R.id.frequencyArray);
+                        if(index != 0) {
+                            text3.setText("" + FREQ.fArray.frequencies[index - 1] + "\n" + index);
+                        }
 
                     }
                 });
            }
         }));
-        Toast.makeText(getApplicationContext(), "" + FREQ.fArray.frequencies[0], Toast.LENGTH_LONG).show();
+
+        //freq.addToFrequencyArray(result[0]);
+
 
         TextView text = (TextView) findViewById(R.id.Pitch);
 
