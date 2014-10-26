@@ -16,7 +16,8 @@ public class RecordingTask {
     int tempo;
     Metronome metronome;
     Context ctx;
-    FrequencyRecorder FREQ;
+    FrequencyRecorder fr;
+    RecordedFrequencies rf;
 
     // set elsewhere
     Timer timer;
@@ -27,18 +28,20 @@ public class RecordingTask {
         this.tempo = tempo;
         this.metronome = new Metronome(tempo, ctx);
         this.ctx = ctx;
-        this.FREQ = new FrequencyRecorder(ctx);
+        this.fr = new FrequencyRecorder();
+        fr.initializeMidiValues();
+        rf = new RecordedFrequencies();
     }
 
     TimerTask createTimerTask(){
         task = new TimerTask(){
             @Override
             public void run() {
-                float[] last_freq = FREQ.fArray.frequencies;
-                Log.i("tick", "tick");
-                float median = FREQ.fArray.getMedian(last_freq);
-                FREQ.fArray.reset();
-                Log.i("MEDIAN FREQ", "------------" + String.valueOf(median) + "--------------");
+                float median = rf.getMedian();
+                String note = fr.getNoteFromFrequency(median);
+                rf.reset();
+                Log.i("MEDIAN FREQ", "------------" + note + "--------------");
+
                 metronome.playTick();
             }
         };

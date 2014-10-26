@@ -1,10 +1,5 @@
 package kenthacks.eric.composr;
 
-import java.util.Date;
-import java.util.Timer;
-import java.util.TimerTask;
-
-
 import android.media.MediaPlayer;
 import android.content.Context;
 
@@ -15,9 +10,6 @@ public class Metronome {
 
     int tempo;
     MediaPlayer m;
-    Boolean sound = false;
-    Timer timer = new Timer();
-    TimerTask task;
 
     // metronome must be initialized to work
     public Metronome(int tempo, Context ctx){
@@ -28,8 +20,5 @@ public class Metronome {
     // play the ticking sound
     void playTick(){
         m.start();
-    }
-    void toggleMetronome() {
-
     }
 }
