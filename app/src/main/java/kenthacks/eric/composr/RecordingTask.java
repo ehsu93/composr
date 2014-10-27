@@ -15,6 +15,9 @@ public class RecordingTask {
 
     // set in the constructor
     int tempo;
+    int beat = 0;
+    boolean start = false;
+    final int INTERVAL = 4;
     Metronome metronome;
     Context ctx;
     FrequencyRecorder fr;
@@ -40,20 +43,37 @@ public class RecordingTask {
         task = new TimerTask(){
             @Override
             public void run() {
-                float median = rf.getMedian();
-                String note = fr.getNoteFromFrequency(median);
-                pattern += note + " ";
-                if (note == "R")
-                    displayPattern += "- ";
-                else {
-                    displayPattern += note + " ";
+                if(start) {
+                    float median = rf.getMedian();
+                    String note = fr.getNoteFromFrequency(median);
+                    pattern += note + " ";
+                    beat++;
+                    if (note == "R")
+                        displayPattern += "- ";
+                    else {
+                        displayPattern += note + " ";
+                    }
+                    if (beat == INTERVAL) {
+                        displayPattern += "| ";
+                        pattern += "| ";
+                        beat = 0;
+                    }
+
+                    if (displayPattern.length() > 20)
+                        displayPattern = displayPattern.substring(displayPattern.length() - 20, displayPattern.length());
+
+                    rf.reset();
+                    Log.i("MEDIAN FREQ", "------------" + pattern + "--------------");
                 }
-                if (displayPattern.length() > 20)
-                    displayPattern = displayPattern.substring(displayPattern.length() - 20, displayPattern.length());
-
-                rf.reset();
-                Log.i("MEDIAN FREQ", "------------" + pattern + "--------------");
-
+                else {
+                    beat++;
+                    displayPattern = ""+ beat;
+                    if(beat == INTERVAL) {
+                        displayPattern = "";
+                        start = true;
+                        beat = 0;
+                    }
+                }
                 metronome.playTick();
             }
         };
@@ -65,14 +85,20 @@ public class RecordingTask {
         Log.i("rt_state", String.valueOf(this.recording));
         if (this.recording){
             pattern = "";
+            displayPattern = "";
             this.timer = new Timer();
             this.task = createTimerTask();
             this.timer.schedule(this.task, new Date(), 60000/tempo);
         }
         else {
-            pattern += "|";
+            while(beat < INTERVAL) {
+                pattern += "R ";
+                beat++;
+            }
+//            pattern += "|";
             timer.cancel();
             timer.purge();
+            beat = 0;
         }
     }
 

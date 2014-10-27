@@ -21,6 +21,7 @@ import nu.xom.Serializer;
  */
 public class PatternToMUSICXML {
     Context context;
+    final String PARENT_DIR = "/Music/";
     //private String givenName = "";
     public PatternToMUSICXML(Context con) {
        context = con;
@@ -30,12 +31,12 @@ public class PatternToMUSICXML {
         try {
 
            File sdCard = Environment.getExternalStorageDirectory();
-           FileOutputStream file = new FileOutputStream(sdCard.getAbsolutePath() +  "/composr_files" + "/" + givenName + ".musicxml");
+           FileOutputStream file = new FileOutputStream(sdCard.getAbsolutePath() +  PARENT_DIR + givenName + ".musicxml");
            MusicXmlRenderer renderer = new MusicXmlRenderer();
            MusicStringParser parser = new MusicStringParser();
            parser.addParserListener(renderer);
 
-           Toast.makeText(context, "Written to " + Environment.getExternalStorageDirectory() + "/composr_files" + "/" + givenName + ".musicxml", Toast.LENGTH_LONG).show();
+           Toast.makeText(context, "Written to " + Environment.getExternalStorageDirectory() + PARENT_DIR + givenName + ".musicxml", Toast.LENGTH_LONG).show();
 
            Pattern pattern = new Pattern(pat);
 
