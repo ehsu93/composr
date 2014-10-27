@@ -43,10 +43,11 @@ public class RecordingTask {
         task = new TimerTask(){
             @Override
             public void run() {
+                float median = rf.getMedian();
+                String note = fr.getNoteFromFrequency(median);
+
                 if(start) {
-                    float median = rf.getMedian();
-                    String note = fr.getNoteFromFrequency(median);
-                    pattern += note + " ";
+                   pattern += note + " ";
                     beat++;
                     if (note == "R")
                         displayPattern += "- ";
