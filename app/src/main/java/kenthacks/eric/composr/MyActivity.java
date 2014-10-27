@@ -30,14 +30,15 @@ public class MyActivity extends Activity {
     private static final String DNAME = "/composr_files";
     RecordingTask rt;
     Context mContext = this;
+    String givenName = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        File sdCard = Environment.getExternalStorageDirectory();
-        File rootPath = new File(sdCard.getAbsolutePath() + DNAME);
+//        File sdCard = Environment.getExternalStorageDirectory();
+/*        File rootPath = new File(sdCard.getAbsolutePath() + DNAME);
         if(!rootPath.exists()) {
             rootPath.mkdir();
-        }
+        }*/
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
@@ -62,8 +63,10 @@ public class MyActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
+                TextView name = (TextView) findViewById(R.id.musicName);
+                givenName = name.getText().toString();
                 try {
-                    pa.write(rt.pattern, "example");
+                    pa.write(rt.pattern, givenName);
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

@@ -30,9 +30,16 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 
+    <EditText
+        android:id = "@+id/musicName"
+        android:hint="Enter music name"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        />
+
     <Button
         android:id="@+id/makeMusic"
-        android:text="Generate Sheet Music"
+        android:text="Export to musicxml"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />
 

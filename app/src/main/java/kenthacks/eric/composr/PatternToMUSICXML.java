@@ -28,6 +28,9 @@ public class PatternToMUSICXML {
     }
 
     public void write(String pat, String givenName) throws IOException {
+        if(givenName.length() < 1) {
+            givenName = "myMusic";
+        }
         try {
 
            File sdCard = Environment.getExternalStorageDirectory();

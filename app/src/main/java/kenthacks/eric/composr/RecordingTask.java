@@ -68,7 +68,8 @@ public class RecordingTask {
                 }
                 else {
                     beat++;
-                    displayPattern = ""+ beat;
+                    int countDown = 4 - beat;
+                    displayPattern = ""+ countDown;
                     if(beat == INTERVAL) {
                         displayPattern = "";
                         start = true;
@@ -96,6 +97,7 @@ public class RecordingTask {
                 pattern += "R ";
                 beat++;
             }
+            start = false;
 //            pattern += "|";
             timer.cancel();
             timer.purge();
