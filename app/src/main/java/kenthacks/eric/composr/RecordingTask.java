@@ -6,11 +6,7 @@ import java.util.TimerTask;
 import android.util.Log;
 
 import android.content.Context;
-import android.widget.Toast;
 
-/**
- * Created by root on 10/25/14.
- */
 public class RecordingTask {
 
     // set in the constructor
@@ -34,8 +30,7 @@ public class RecordingTask {
         this.tempo = tempo;
         this.metronome = new Metronome(tempo, ctx);
         this.ctx = ctx;
-        this.fr = new FrequencyRecorder();
-        fr.initializeMidiValues();
+        this.fr = new FrequencyRecorder(ctx);
         rf = new RecordedFrequencies();
     }
 
@@ -43,7 +38,8 @@ public class RecordingTask {
         task = new TimerTask(){
             @Override
             public void run() {
-                float median = rf.getMedian();
+                RecordedFrequencies previous_frequencies = rf;
+                float median = previous_frequencies.getMedian();
                 String note = fr.getNoteFromFrequency(median);
 
                 if(start) {
