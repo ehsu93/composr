@@ -1,19 +1,2 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merger version="2" >
-
-    <dataSet config="main" >
-        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\res" >
-            <file
-                name="device_filter"
-                path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\res\xml\device_filter.xml"
-                qualifiers=""
-                type="xml" />
-        </source>
-        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\build\generated\res\rs\debug" />
-        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\build\generated\res\generated\debug" />
-    </dataSet>
-    <dataSet config="debug" >
-        <source path="C:\Users\Eric\Documents\GitHub\composr\MIDIDriver\build-types\debug\res" />
-    </dataSet>
-
-</merger>
+<merger version="3"><dataSet config="main"><source path="/home/meaghan/Desktop/code/composr/MIDIDriver/res"><file name="device_filter" path="/home/meaghan/Desktop/code/composr/MIDIDriver/res/xml/device_filter.xml" qualifiers="" type="xml"/></source><source path="/home/meaghan/Desktop/code/composr/MIDIDriver/build/generated/res/rs/debug"/><source path="/home/meaghan/Desktop/code/composr/MIDIDriver/build/generated/res/generated/debug"/></dataSet><dataSet config="debug"><source path="/home/meaghan/Desktop/code/composr/MIDIDriver/build-types/debug/res"/></dataSet><mergedItems/></merger>
