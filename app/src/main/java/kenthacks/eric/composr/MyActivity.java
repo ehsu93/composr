@@ -2,8 +2,6 @@ package kenthacks.eric.composr;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -12,8 +10,6 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.opencsv.CSVReader;
-
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.io.android.AudioDispatcherFactory;
@@ -21,12 +17,7 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
-import java.io.FileReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.LinkedList;
-import java.util.List;
 
 import static android.widget.Toast.makeText;
 
@@ -48,7 +39,7 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
-        rt = new RecordingTask(60, this);
+        rt = new RecordingTask(60, 4, this);
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
 
         final Button metronomeButton = (Button) findViewById(R.id.Toggle);
@@ -60,9 +51,10 @@ public class MyActivity extends Activity {
                 else {
                     metronomeButton.setText("Stop Listening");
                 }
-                rt.toggle();
+                rt.toggleRecordingTask();
             }
         });
+
         final Button musicButton = (Button) findViewById(R.id.makeMusic);
         musicButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -84,7 +76,7 @@ public class MyActivity extends Activity {
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
                 final float pitchInHz = pitchDetectionResult.getPitch();
-                final String note = rt.fr.getNoteFromFrequency(pitchInHz);
+                final String note = rt.fr.getNoteFromFreq(pitchInHz);
 
                 rt.rf.addFrequency(pitchInHz);
 
@@ -101,7 +93,7 @@ public class MyActivity extends Activity {
                         text3.setText(newtext);
                     }
                 });
-           }
+            }
         }));
 
         new Thread(dispatcher, "Audio Dispatcher").start();

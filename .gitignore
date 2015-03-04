@@ -6,3 +6,4 @@
 /build
 MIDIDriver/build
 *.log
+*.java~

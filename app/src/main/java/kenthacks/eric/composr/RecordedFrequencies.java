@@ -15,6 +15,10 @@ public class RecordedFrequencies {
         frequencies = new LinkedList<Float>();
     }
 
+    public RecordedFrequencies(LinkedList<Float> frequencies) {
+        this.frequencies = frequencies;
+    }
+
     /**
      * Adds a frequency value to the list of frequencies
      *

@@ -9,96 +9,174 @@ import android.content.Context;
 
 public class RecordingTask {
 
-    // set in the constructor
-    int tempo;
-    int beat = 0;
-    boolean start = false;
-    final int INTERVAL = 4;
-    Metronome metronome;
+    // given as user inputs
+    int bpm;
+    int beats;
+    int samplesPerBeat;
+
+    // sent in from MyActivity
     Context ctx;
+
+    // initial values
+    int currentBeat = 0;
+    int currentSampleNumber = 0;
+    boolean countdownComplete = false;
+    boolean recording = false;
+
+    Float previousFreq;
+    int sameNoteStreak;
+
+    // instances of other classes in the application
+    Metronome metronome;
     FrequencyRecorder fr;
     RecordedFrequencies rf;
 
-    // set elsewhere
+    // created by toggle
     Timer timer;
     TimerTask task;
-    boolean recording = false;
     public String pattern = "";
     public String displayPattern = "";
 
-    public RecordingTask(int tempo, Context ctx){
-        this.tempo = tempo;
-        this.metronome = new Metronome(tempo, ctx);
+    public RecordingTask(int tempo, int beats, Context ctx){
+        this.bpm = tempo;
+        this.beats = beats;
         this.ctx = ctx;
+
+        this.samplesPerBeat = 4;
+
+        this.metronome = new Metronome(ctx);
         this.fr = new FrequencyRecorder(ctx);
-        rf = new RecordedFrequencies();
+        this.rf = new RecordedFrequencies();
     }
 
-    TimerTask createTimerTask(){
+    public TimerTask createTimerTask(){
         task = new TimerTask(){
+
             @Override
             public void run() {
-                RecordedFrequencies previous_frequencies = rf;
-                float median = previous_frequencies.getMedian();
-                String note = fr.getNoteFromFrequency(median);
 
-                if(start) {
-                   pattern += note + " ";
-                    beat++;
-                    if (note == "R")
-                        displayPattern += "- ";
-                    else {
-                        displayPattern += note + " ";
-                    }
-                    if (beat == INTERVAL) {
-                        displayPattern += "| ";
-                        pattern += "| ";
-                        beat = 0;
+                currentSampleNumber++;
+                if (currentSampleNumber == samplesPerBeat) {
+
+                    if (!countdownComplete){
+                        int countDown = 4 - currentBeat;
+                        displayPattern = ""+ countDown;
+                        if(currentBeat == beats) {
+                            displayPattern = "";
+                            countdownComplete = true;
+                            currentBeat = 0;
+                        }
                     }
 
-                    if (displayPattern.length() > 20)
-                        displayPattern = displayPattern.substring(displayPattern.length() - 20, displayPattern.length());
+                    currentBeat++;
+                    currentSampleNumber = 0;
 
+                    metronome.playTick();
+                }
+
+                if (countdownComplete) {
+                    RecordedFrequencies previous_frequencies = new RecordedFrequencies(rf.frequencies);
                     rf.reset();
-                    Log.i("MEDIAN FREQ", "------------" + pattern + "--------------");
-                }
-                else {
-                    beat++;
-                    int countDown = 4 - beat;
-                    displayPattern = ""+ countDown;
-                    if(beat == INTERVAL) {
-                        displayPattern = "";
-                        start = true;
-                        beat = 0;
+                    float median = previous_frequencies.getMedian();
+                    String note = fr.getNoteFromFreq(median);
+
+                    if (median == previousFreq){
+                        sameNoteStreak++;
+                    } else {
+
+
+                        updatePattern(note);
+                        updateDisplayPattern(note);
+
+                        // reset same note streak
+                        sameNoteStreak = 0;
+
+                        // update previousFreq
+                        previousFreq = median;
+                    }
+
+                    if (currentSampleNumber == samplesPerBeat) {
+                        if (currentBeat == beats) {
+                            endMeasure();
+                        }
                     }
                 }
-                metronome.playTick();
             }
         };
         return task;
     }
 
-    void toggle(){
+    public void toggleRecordingTask(){
         this.recording = !this.recording;
+
         Log.i("rt_state", String.valueOf(this.recording));
+
         if (this.recording){
             pattern = "";
             displayPattern = "";
             this.timer = new Timer();
             this.task = createTimerTask();
-            this.timer.schedule(this.task, new Date(), 60000/tempo);
+            this.timer.schedule(this.task, new Date(), (60000/bpm)/samplesPerBeat);
         }
+
         else {
-            while(beat < INTERVAL) {
+            while(currentBeat < beats) {
                 pattern += "R ";
-                beat++;
+                currentBeat++;
             }
-            start = false;
-//            pattern += "|";
+            countdownComplete = false;
             timer.cancel();
             timer.purge();
-            beat = 0;
+            currentBeat = 0;
         }
+    }
+
+    public void updatePattern(String note, int duration){
+        String durationString = getDurationString(duration);
+        pattern += note + durationString + " ";
+    }
+
+    public void updatePattern(String note){
+        updatePattern(note, 0);
+    }
+
+    public String getDurationString(int duration){
+
+        if (duration != 0){
+            int samplePortionOfMeasure = samplesPerBeat / beats;
+            int x = duration * samplePortionOfMeasure / beats;
+            return Integer.toString(x);
+        }
+
+        return "";
+
+    }
+
+    public void updateDisplayPattern(String note, String duration){
+        if (note == "R"){
+            // TODO find a different way to represent different length rests
+            displayPattern += "- ";
+        } else {
+            displayPattern += note + duration + " ";
+        }
+
+        if (displayPattern.length() > 20) {
+            truncateDisplayPattern();
+        }
+    }
+
+    public void updateDisplayPattern(String note){
+        updateDisplayPattern(note, "");
+    }
+
+    public void truncateDisplayPattern(){
+        displayPattern = displayPattern.substring(displayPattern.length() - 20, displayPattern.length());
+    }
+
+    public void endMeasure(){
+        updatePattern("|");
+        updateDisplayPattern("|");
+        currentBeat = 0;
     }
 
 }

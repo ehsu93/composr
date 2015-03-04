@@ -1,6 +1,7 @@
 package kenthacks.eric.composr;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.opencsv.CSVReader;
 
@@ -73,73 +74,73 @@ public class FrequencyRecorder {
     /**
      * Returns the note closest to the given frequency
      *
-     * @param recordedFrequency the frequency recorded from user input
+     * @param recordedFreq the frequency recorded from user input
      * @return the name of the note most closely associated with the input frequency
      */
-    public String getNoteFromFrequency(Float recordedFrequency) {
-        Float nearest_frequency = getNearestFrequency(recordedFrequency);
-        if (nearest_frequency == -1f) {
+    public String getNoteFromFreq(Float recordedFreq) {
+        Float nearest_freq = getNearestFreq(recordedFreq);
+        if (nearest_freq == -1f) {
             return "R";
         }
-        return midiValues.get(nearest_frequency);
+        return midiValues.get(nearest_freq);
     }
 
     /**
      * Returns the frequency closest the the recorded frequency value
      *
-     * @param recordedFrequency the frequency of the current note
+     * @param recordedFreq the frequency of the current note
      * @return the frequency closest to the input frequency that has an associated note
      */
-    public Float getNearestFrequency(Float recordedFrequency) {
-        // finds closest frequency to recordedFrequency using a binary search
-        if (recordedFrequency < 20 || recordedFrequency > 4200){
+    public Float getNearestFreq(Float recordedFreq) {
+        // finds closest frequency to recordedFreq using a binary search
+        if (recordedFreq < 20 || recordedFreq > 4200){
             return -1f;
         }
-        int index = bin_search(recordedFrequency, 0, FREQUENCIES.length - 1);
-        return FREQUENCIES[index];
+
+        // return the result of performing a binary search to find the closest frequency
+        return searchFreqs(recordedFreq, 0, FREQUENCIES.length - 1);
     }
 
     /**
      * Performs a binary search to find the closest frequency that corresponds with a note
      *
-     * @param recordedFrequency The frequency recorded from user input
+     * @param freq The frequency recorded from user input
      * @param lo                The lower bound of the search
      * @param hi                The upper bound of the search
      * @return The index of the closest frequency corresponding with a note
      */
-    public int bin_search(Float recordedFrequency, int lo, int hi) {
+    public Float searchFreqs(Float freq, int lo, int hi) {
         // midpoint between hi and low
         int mid = lo + (hi - lo) / 2;
 
-        // when hi and lo have either met or crossed, return the midpoint
+        // when hi and lo have either met or crossed, return the value that's closer
         if (hi - lo < 2) {
-            // either hi or lo will be closer to the frequency
-            Float diff_hi = Math.abs(FREQUENCIES[hi] - recordedFrequency);
-            Float diff_lo = Math.abs(FREQUENCIES[lo] - recordedFrequency);
+            Float diff_hi = Math.abs(FREQUENCIES[hi] - freq);
+            Float diff_lo = Math.abs(FREQUENCIES[lo] - freq);
 
-            if (diff_hi < diff_lo) {
-                return hi;
+            if (diff_lo < diff_hi){
+                return FREQUENCIES[lo];
             } else {
-                return lo;
+                return FREQUENCIES[hi];
             }
         }
 
         // compare the recorded frequency to the frequency at the current median frequency
-        int cmp = FREQUENCIES[mid].compareTo(recordedFrequency);
+        int cmp = FREQUENCIES[mid].compareTo(freq);
 
         // recorded frequency is lower than the current midpoint
         if (cmp > 0) {
-            return bin_search(recordedFrequency, lo, mid);
+            return searchFreqs(freq, lo, mid);
         }
 
         // recorded frequency is higher than the current median frequency
         else if (cmp < 0) {
 
             // mid is not incremented because it could be the closest value
-            return bin_search(recordedFrequency, mid, hi);
+            return searchFreqs(freq, mid, hi);
         }
 
         // recorded frequency exactly equals the current median frequency, this won't happen often
-        else return mid;
+        else return FREQUENCIES[mid];
     }
 }
