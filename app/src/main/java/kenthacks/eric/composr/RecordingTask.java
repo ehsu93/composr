@@ -1,10 +1,10 @@
 package kenthacks.eric.composr;
 
 import java.util.Date;
+import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.util.Log;
-import java.util.LinkedList;
 
 import android.content.Context;
 
@@ -12,17 +12,20 @@ public class RecordingTask {
 
     // given as user inputs
     int bpm;
-    int beats;
+    int beatsPerMeasure;
     int samplesPerBeat;
 
     // sent in from MyActivity
     Context ctx;
 
     // initial values
-    int currentBeat = 0;
-    int currentSampleNumber = 0;
     boolean countdownComplete = false;
     boolean recording = false;
+
+    SampleBeatPair previousPosition;
+    SampleBeatPair currentPosition;
+
+    Hashtable<SampleBeatPair, RecordedFrequencies> frequencies = new Hashtable<>();
 
     Float previousFreq;
     int sameNoteStreak;
@@ -40,7 +43,7 @@ public class RecordingTask {
 
     public RecordingTask(int tempo, int beats, Context ctx){
         this.bpm = tempo;
-        this.beats = beats;
+        this.beatsPerMeasure = beats;
         this.ctx = ctx;
 
         this.samplesPerBeat = 4;
@@ -48,10 +51,17 @@ public class RecordingTask {
         this.metronome = new Metronome(ctx);
         this.fr = new FrequencyRecorder(ctx);
         this.rf = new RecordedFrequencies();
+
+        this.currentPosition = new SampleBeatPair(0, 0, 0);
     }
 
     public void addFreq(Float freq){
-        rf.addFrequency(freq);
+        RecordedFrequencies recordedFrequencies = frequencies.get(currentPosition);
+
+        if (recordedFrequencies == null) {
+            frequencies.put(currentPosition, new RecordedFrequencies());
+        }
+        frequencies.get(currentPosition).addFrequency(freq);
     }
 
     public TimerTask createTimerTask(){
@@ -59,38 +69,19 @@ public class RecordingTask {
 
             @Override
             public void run() {
-                RecordedFrequencies last = new RecordedFrequencies(new LinkedList<Float>(rf.frequencies));
-                rf.reset();
 
-                currentSampleNumber++;
-                if (currentSampleNumber == samplesPerBeat) {
+                previousPosition = new SampleBeatPair(currentPosition);
+                incrementPosition();
 
-                    if (!countdownComplete){
-                        int countDown = 4 - currentBeat;
-                        displayPattern = ""+ countDown;
-                        if(currentBeat == beats) {
-                            displayPattern = "";
-                            countdownComplete = true;
-                            currentBeat = 0;
-                        }
-                    }
-
-                    currentBeat++;
-                    currentSampleNumber = 0;
-
-                    metronome.playTick();
-                }
-
-                if (countdownComplete) {
-                    float median = last.getMedian();
+                if(countdownComplete){
+                    RecordedFrequencies previousFrequencies = frequencies.get(previousPosition);
+                    float median = previousFrequencies.getMedian();
                     String note = fr.getNoteFromFreq(median);
 
                     if (median == previousFreq){
                         sameNoteStreak++;
                     } else {
-
-
-                        updatePattern(note);
+                        updatePattern(note, sameNoteStreak);
                         updateDisplayPattern(note);
 
                         // reset same note streak
@@ -99,13 +90,22 @@ public class RecordingTask {
                         // update previousFreq
                         previousFreq = median;
                     }
+                }
 
-                    if (currentSampleNumber == samplesPerBeat) {
-                        if (currentBeat == beats) {
-                            endMeasure();
-                        }
+                else if (currentPosition.isNewBeat()){
+                    int countDown = beatsPerMeasure - currentPosition.getBeat();
+                    displayPattern = ""+ countDown;
+
+                    if(currentPosition.isNewMeasure()) {
+                        displayPattern = "";
+                        countdownComplete = true;
                     }
                 }
+
+                if (currentPosition.isNewBeat()){
+                    metronome.playTick();
+                }
+
             }
         };
         return task;
@@ -114,25 +114,22 @@ public class RecordingTask {
     public void toggleRecordingTask(){
         this.recording = !this.recording;
 
-        Log.i("rt_state", String.valueOf(this.recording));
-
         if (this.recording){
-            pattern = "";
-            displayPattern = "";
+            resetPatterns();
+
             this.timer = new Timer();
             this.task = createTimerTask();
+
+            this.currentPosition = new SampleBeatPair();
             this.timer.schedule(this.task, new Date(), (60000/bpm)/samplesPerBeat);
         }
 
         else {
-            while(currentBeat < beats) {
-                pattern += "R ";
-                currentBeat++;
-            }
+            fillCurrentMeasureWithRests();
+
             countdownComplete = false;
             timer.cancel();
             timer.purge();
-            currentBeat = 0;
         }
     }
 
@@ -148,8 +145,8 @@ public class RecordingTask {
     public String getDurationString(int duration){
 
         if (duration != 0){
-            int samplePortionOfMeasure = samplesPerBeat / beats;
-            int x = duration * samplePortionOfMeasure / beats;
+            int samplePortionOfMeasure = samplesPerBeat / beatsPerMeasure;
+            int x = duration * samplePortionOfMeasure / beatsPerMeasure;
             return Integer.toString(x);
         }
 
@@ -178,10 +175,43 @@ public class RecordingTask {
         displayPattern = displayPattern.substring(displayPattern.length() - 20, displayPattern.length());
     }
 
-    public void endMeasure(){
+    public void resetPatterns(){
+        resetPattern();
+        resetDisplayPattern();
+    }
+
+    public void resetPattern(){
+        pattern = "";
+    }
+
+    public void resetDisplayPattern(){
+        displayPattern = "";
+    }
+
+    public void processEndOfMeasure(){
         updatePattern("|");
         updateDisplayPattern("|");
-        currentBeat = 0;
+    }
+
+    public void fillCurrentMeasureWithRests(){
+        //TODO handle parts of a beat
+        while(currentPosition.getBeat() < beatsPerMeasure) {
+            pattern += "R ";
+            currentPosition.incrementBeat();
+        }
+    }
+
+    public void incrementPosition(){
+        currentPosition.incrememntSample();
+
+        if (currentPosition.getSample() == samplesPerBeat){
+            currentPosition.incrementBeat();
+        }
+
+        if (currentPosition.getBeat() == beatsPerMeasure){
+            currentPosition.incrementMeasure();
+            processEndOfMeasure();
+        }
     }
 
 }
