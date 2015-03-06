@@ -2,6 +2,7 @@ package kenthacks.eric.composr;
 
 import android.app.Activity;
 import android.content.Context;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -9,6 +10,8 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import org.jfugue.Player;
 
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
@@ -27,6 +30,7 @@ public class MyActivity extends Activity {
     RecordingTask rt;
     Context mContext = this;
     String givenName = "";
+    int beatsPerMeasure = 4;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,6 +45,19 @@ public class MyActivity extends Activity {
 
         rt = new RecordingTask(60, 4, this);
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
+
+        final Button beats =  (Button) findViewById(R.id.beats);
+        beats.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                switch(beatsPerMeasure) {
+                    case(4): beats.setText("2 beats"); beatsPerMeasure = 2; break;
+                    case(3): beats.setText("4 beats"); beatsPerMeasure = 4; break;
+                    case(2): beats.setText("3 beats"); beatsPerMeasure = 3; break;
+                    default: break;
+                }
+            }
+        });
 
         final Button metronomeButton = (Button) findViewById(R.id.Toggle);
         metronomeButton.setOnClickListener(new View.OnClickListener() {
@@ -69,9 +86,115 @@ public class MyActivity extends Activity {
                 }
             }
         });
+//PITCH PIPE PART, NEED TO CLEAN UP LATER
 
+        final PitchPipe pipe = new PitchPipe(this, "A");
+
+        final Button aNote = (Button) findViewById(R.id.a);
+        final Button aSharpNote = (Button) findViewById(R.id.aSharp);
+        final Button bNote = (Button) findViewById(R.id.b);
+        final Button cNote = (Button) findViewById(R.id.c);
+        final Button cSharpNote = (Button) findViewById(R.id.cSharp);
+        final Button dNote = (Button) findViewById(R.id.d);
+        final Button dSharpNote = (Button) findViewById(R.id.dSharp);
+        final Button eNote = (Button) findViewById(R.id.e);
+        final Button fNote = (Button) findViewById(R.id.f);
+        final Button fSharpNote = (Button) findViewById(R.id.fSharp);
+        final Button gNote = (Button) findViewById(R.id.g);
+        final Button gSharpNote = (Button) findViewById(R.id.gSharp);
+
+
+        final MediaPlayer A = MediaPlayer.create(this, R.raw.a);
+        final MediaPlayer ASHARP = MediaPlayer.create(this, R.raw.asharp);
+        final MediaPlayer B = MediaPlayer.create(this, R.raw.b);
+        final MediaPlayer C = MediaPlayer.create(this, R.raw.c);
+        final MediaPlayer CSHARP = MediaPlayer.create(this, R.raw.csharp);
+        final MediaPlayer D = MediaPlayer.create(this, R.raw.d);
+        final MediaPlayer DSHARP = MediaPlayer.create(this, R.raw.dsharp);
+        final MediaPlayer E = MediaPlayer.create(this, R.raw.e);
+        final MediaPlayer F = MediaPlayer.create(this, R.raw.f);
+        final MediaPlayer FSHARP = MediaPlayer.create(this, R.raw.fsharp);
+        final MediaPlayer G = MediaPlayer.create(this, R.raw.g);
+        final MediaPlayer GSHARP = MediaPlayer.create(this, R.raw.gsharp);
+        boolean toggle = false;
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
+        aNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(A);
+            }
+        });
+        aSharpNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(ASHARP);
+            }
+        });
+        bNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(B);
+            }
+        });
+        cNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(C);
+            }
+        });
+        cSharpNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(CSHARP);
+            }
+        });
+        dNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(D);
+            }
+        });
+        dSharpNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(DSHARP);
+            }
+        });
+        eNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(E);
+            }
+        });
+        fNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(F);
+            }
+        });
+        fSharpNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(FSHARP);
+            }
+        });
+        gNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(G);
+            }
+        });
+        gSharpNote.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                pipe.togglePlayTest(GSHARP);
+            }
+        });
+
+
+
+//PITCH PIPE END
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
