@@ -201,7 +201,7 @@ public class MyActivity extends Activity {
                 final float pitchInHz = pitchDetectionResult.getPitch();
                 final String note = rt.fr.getNoteFromFreq(pitchInHz);
 
-                rt.rf.addFrequency(pitchInHz);
+                rt.addFreq(pitchInHz);
 
                 runOnUiThread((Runnable) new Runnable() {
                     @Override

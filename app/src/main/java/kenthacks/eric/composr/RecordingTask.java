@@ -4,6 +4,7 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.util.Log;
+import java.util.LinkedList;
 
 import android.content.Context;
 
@@ -49,11 +50,17 @@ public class RecordingTask {
         this.rf = new RecordedFrequencies();
     }
 
+    public void addFreq(Float freq){
+        rf.addFrequency(freq);
+    }
+
     public TimerTask createTimerTask(){
         task = new TimerTask(){
 
             @Override
             public void run() {
+                RecordedFrequencies last = new RecordedFrequencies(new LinkedList<Float>(rf.frequencies));
+                rf.reset();
 
                 currentSampleNumber++;
                 if (currentSampleNumber == samplesPerBeat) {
@@ -75,9 +82,7 @@ public class RecordingTask {
                 }
 
                 if (countdownComplete) {
-                    RecordedFrequencies previous_frequencies = new RecordedFrequencies(rf.frequencies);
-                    rf.reset();
-                    float median = previous_frequencies.getMedian();
+                    float median = last.getMedian();
                     String note = fr.getNoteFromFreq(median);
 
                     if (median == previousFreq){
