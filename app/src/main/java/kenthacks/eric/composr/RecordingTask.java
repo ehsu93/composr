@@ -41,11 +41,14 @@ public class RecordingTask {
     public String pattern = "";
     public String displayPattern = "";
 
+    int count;
+
     public RecordingTask(int tempo, int beats, Context ctx){
         this.bpm = tempo;
         this.beatsPerMeasure = beats;
         this.ctx = ctx;
 
+        // determines the accuracy of the application
         this.samplesPerBeat = 4;
 
         this.metronome = new Metronome(ctx);
@@ -56,12 +59,14 @@ public class RecordingTask {
     }
 
     public void addFreq(Float freq){
+        count++;
+        /*
         RecordedFrequencies recordedFrequencies = frequencies.get(currentPosition);
 
         if (recordedFrequencies == null) {
             frequencies.put(currentPosition, new RecordedFrequencies());
         }
-        frequencies.get(currentPosition).addFrequency(freq);
+        frequencies.get(currentPosition).addFrequency(freq);*/
     }
 
     public TimerTask createTimerTask(){
@@ -74,6 +79,8 @@ public class RecordingTask {
                 incrementPosition();
 
                 if(countdownComplete){
+                    Log.i("count", Integer.toString(count));
+                    /*
                     RecordedFrequencies previousFrequencies = frequencies.get(previousPosition);
                     float median = previousFrequencies.getMedian();
                     String note = fr.getNoteFromFreq(median);
@@ -89,7 +96,7 @@ public class RecordingTask {
 
                         // update previousFreq
                         previousFreq = median;
-                    }
+                    }*/
                 }
 
                 else if (currentPosition.isNewBeat()){

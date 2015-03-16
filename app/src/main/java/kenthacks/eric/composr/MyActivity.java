@@ -2,12 +2,17 @@ package kenthacks.eric.composr;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Point;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,6 +37,9 @@ public class MyActivity extends Activity {
     String givenName = "";
     int beatsPerMeasure = 4;
 
+    int HEIGHT;
+    int WIDTH;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 //        File sdCard = Environment.getExternalStorageDirectory();
@@ -42,6 +50,22 @@ public class MyActivity extends Activity {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
+        LinearLayout noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
+
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        WIDTH = size.x;
+        HEIGHT = size.y;
+
+        // Draw the notes
+        DrawNotes dn = new DrawNotes(this);
+        Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        dn.draw(canvas);
+        dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
+        noteLayout.addView(dn);
+
 
         rt = new RecordingTask(60, 4, this);
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
