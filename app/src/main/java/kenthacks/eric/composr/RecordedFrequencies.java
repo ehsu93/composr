@@ -1,21 +1,21 @@
 package kenthacks.eric.composr;
 
-import java.util.LinkedList;
+import java.util.ArrayList;
 import java.util.Collections;
 
 public class RecordedFrequencies {
 
     /** A list containing all the frequencies that have been recorded */
-    LinkedList<Float> frequencies;
+    ArrayList<Float> frequencies;
 
     /**
      * Initializes the LinkedList containing all the frequencies
      */
     public RecordedFrequencies() {
-        frequencies = new LinkedList<Float>();
+        frequencies = new ArrayList<Float>();
     }
 
-    public RecordedFrequencies(LinkedList<Float> frequencies) {
+    public RecordedFrequencies(ArrayList<Float> frequencies) {
         this.frequencies = frequencies;
     }
 
@@ -33,7 +33,7 @@ public class RecordedFrequencies {
      */
     public void reset(){
         frequencies = null; // a strong hint that this can be deallocated
-        frequencies = new LinkedList<Float>();
+        frequencies = new ArrayList<Float>();
     }
 
     /**
@@ -41,9 +41,18 @@ public class RecordedFrequencies {
      *
      * @return the median frequency over an interval
      */
-    public float getMedian() {
-        Collections.sort(frequencies);
-        int mid = frequencies.size()/2;
-        return frequencies.get(mid).floatValue();
+    public float getMedian(ArrayList<Float> l) {
+        Collections.sort(l);
+        int mid = l.size()/2;
+        return l.get(mid).floatValue();
+    }
+
+    public float getMedian(int start, int end){
+        ArrayList<Float> sub = new ArrayList<Float>();
+
+        for (int i = start; i < end; i++){
+            sub.add(frequencies.get(i));
+        }
+        return getMedian(sub);
     }
 }

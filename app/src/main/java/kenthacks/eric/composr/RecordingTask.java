@@ -25,8 +25,6 @@ public class RecordingTask {
     SampleBeatPair previousPosition;
     SampleBeatPair currentPosition;
 
-    Hashtable<SampleBeatPair, RecordedFrequencies> frequencies = new Hashtable<>();
-
     Float previousFreq;
     int sameNoteStreak;
 
@@ -41,6 +39,8 @@ public class RecordingTask {
     public String pattern = "";
     public String displayPattern = "";
 
+    int start;
+    int end;
     int count;
 
     public RecordingTask(int tempo, int beats, Context ctx){
@@ -56,17 +56,14 @@ public class RecordingTask {
         this.rf = new RecordedFrequencies();
 
         this.currentPosition = new SampleBeatPair(0, 0, 0);
+        this.start = 0;
+        this.previousFreq = 0f;
     }
 
     public void addFreq(Float freq){
         count++;
-        /*
-        RecordedFrequencies recordedFrequencies = frequencies.get(currentPosition);
+        rf.addFrequency(freq);
 
-        if (recordedFrequencies == null) {
-            frequencies.put(currentPosition, new RecordedFrequencies());
-        }
-        frequencies.get(currentPosition).addFrequency(freq);*/
     }
 
     public TimerTask createTimerTask(){
@@ -79,10 +76,13 @@ public class RecordingTask {
                 incrementPosition();
 
                 if(countdownComplete){
-                    Log.i("count", Integer.toString(count));
-                    /*
-                    RecordedFrequencies previousFrequencies = frequencies.get(previousPosition);
-                    float median = previousFrequencies.getMedian();
+                    end = count;
+                    Log.i("samplecount", Integer.toString(count));
+
+                    float median = rf.getMedian(start, end);
+
+                    Log.i("median", Float.toString(median));
+                    
                     String note = fr.getNoteFromFreq(median);
 
                     if (median == previousFreq){
@@ -96,7 +96,8 @@ public class RecordingTask {
 
                         // update previousFreq
                         previousFreq = median;
-                    }*/
+                    }
+                    start = end;
                 }
 
                 else if (currentPosition.isNewBeat()){
