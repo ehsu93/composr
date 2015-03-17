@@ -16,8 +16,6 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import org.jfugue.Player;
-
 import be.tarsos.dsp.AudioDispatcher;
 import be.tarsos.dsp.AudioEvent;
 import be.tarsos.dsp.io.android.AudioDispatcherFactory;
@@ -27,32 +25,42 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 
 import java.io.IOException;
 
-import static android.widget.Toast.makeText;
-
 public class MyActivity extends Activity {
 
-    private static final String DNAME = "/composr_files";
+    //private static final String DNAME = "/composr_files";
+
+    /** RecordingTask instance */
     RecordingTask rt;
+
+    /** DrawNotes instance */
     DrawNotes dn;
+
+    /** mContext */
     Context mContext = this;
+
+    /** Default name of file */
     String givenName = "";
+
+    /** Default number of beats per measure */
     int beatsPerMeasure = 4;
+
+    /** Default value of beat duration */
+    int beatDuration = 4;
+
+    /** Store the bpm */
+    int bpm = 60;
 
     int HEIGHT;
     int WIDTH;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-//        File sdCard = Environment.getExternalStorageDirectory();
-/*        File rootPath = new File(sdCard.getAbsolutePath() + DNAME);
-        if(!rootPath.exists()) {
-            rootPath.mkdir();
-        }*/
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
         LinearLayout noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
 
+        // get height and width of screen
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
         display.getSize(size);
@@ -67,8 +75,8 @@ public class MyActivity extends Activity {
         dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
         noteLayout.addView(dn);
 
-
-        rt = new RecordingTask(60, 4, this);
+        // initialize RecordingTask object, default
+        rt = new RecordingTask(bpm, 4, this);
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
 
         final Button beats =  (Button) findViewById(R.id.beats);
@@ -78,21 +86,17 @@ public class MyActivity extends Activity {
                 switch(beatsPerMeasure) {
                     case(4): beats.setText("2 beats");
                         beatsPerMeasure = 2;
-                        dn.updateTimeSignature(2, 4);
-                        dn.invalidate();
                         break;
                     case(3): beats.setText("4 beats");
                         beatsPerMeasure = 4;
-                        dn.updateTimeSignature(4, 4);
-                        dn.invalidate();
                         break;
                     case(2): beats.setText("3 beats");
                         beatsPerMeasure = 3;
-                        dn.updateTimeSignature(3, 4);
-                        dn.invalidate();
                         break;
                     default: break;
                 }
+                dn.updateTimeSignature(beatsPerMeasure, 4);
+                dn.invalidate();
             }
         });
 
@@ -123,7 +127,8 @@ public class MyActivity extends Activity {
                 }
             }
         });
-//PITCH PIPE PART, NEED TO CLEAN UP LATER
+
+        //PITCH PIPE PART, TODO: NEED TO CLEAN UP LATER
 
         final PitchPipe pipe = new PitchPipe(this, "A");
 
@@ -139,7 +144,6 @@ public class MyActivity extends Activity {
         final Button fSharpNote = (Button) findViewById(R.id.fSharp);
         final Button gNote = (Button) findViewById(R.id.g);
         final Button gSharpNote = (Button) findViewById(R.id.gSharp);
-
 
         final MediaPlayer A = MediaPlayer.create(this, R.raw.a);
         final MediaPlayer ASHARP = MediaPlayer.create(this, R.raw.asharp);
@@ -229,9 +233,8 @@ public class MyActivity extends Activity {
             }
         });
 
+        //PITCH PIPE END
 
-
-//PITCH PIPE END
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
@@ -270,9 +273,8 @@ public class MyActivity extends Activity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
+        // Handle action bar item clicks here. The action bar will automatically handle clicks on
+        // the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
             return true;

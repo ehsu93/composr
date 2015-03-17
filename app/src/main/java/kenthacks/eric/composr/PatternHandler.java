@@ -11,9 +11,6 @@ import java.io.IOException;
 
 import nu.xom.Serializer;
 
-/**
- * Created by Vanya on 10/25/2014.
- */
 public class PatternHandler {
 
     //private String givenName = "";

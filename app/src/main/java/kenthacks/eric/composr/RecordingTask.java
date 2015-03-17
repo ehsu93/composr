@@ -1,7 +1,6 @@
 package kenthacks.eric.composr;
 
 import java.util.Date;
-import java.util.Hashtable;
 import java.util.Timer;
 import java.util.TimerTask;
 import android.util.Log;
@@ -30,7 +29,7 @@ public class RecordingTask {
 
     // instances of other classes in the application
     Metronome metronome;
-    FrequencyRecorder fr;
+    FrequencyAnalyzer fr;
     RecordedFrequencies rf;
 
     // created by toggle
@@ -52,7 +51,7 @@ public class RecordingTask {
         this.samplesPerBeat = 4;
 
         this.metronome = new Metronome(ctx);
-        this.fr = new FrequencyRecorder(ctx);
+        this.fr = new FrequencyAnalyzer(ctx);
         this.rf = new RecordedFrequencies();
 
         this.currentPosition = new SampleBeatPair(0, 0, 0);
