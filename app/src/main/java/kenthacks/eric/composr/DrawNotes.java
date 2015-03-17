@@ -22,6 +22,8 @@ public class DrawNotes extends View {
     final int HEIGHT;
     final int WIDTH;
 
+    String timeSignature;
+
     public DrawNotes(Context ctx){
         super(ctx);
 
@@ -56,6 +58,8 @@ public class DrawNotes extends View {
         timePaint.setColor(Color.BLACK);
         timePaint.setTypeface(noteTypeFace);
         timePaint.setTextSize(5.75f * SPACE_BETWEEN_LINES);
+
+        timeSignature = "$"; // default value of 4/4
     }
 
     public void onDraw(Canvas canvas){
@@ -76,14 +80,41 @@ public class DrawNotes extends View {
         canvas.drawText("g", PADDING_LEFT, 5.65f * SPACE_BETWEEN_LINES, clefPaint);
 
         // time signature
-
-        canvas.drawText("$", PADDING_LEFT + SPACE_BETWEEN_LINES * 2.5f, 4 * SPACE_BETWEEN_LINES + PADDING_TOP, timePaint);
+        // K = 4/2, L = 3/2,
+        // % = 5/4, $ = 4/4, # = 3/4, @ = 2/4,
+        // k = 2/8, P = 6/8
+        canvas.drawText(timeSignature, PADDING_LEFT + SPACE_BETWEEN_LINES * 2.5f, 4 * SPACE_BETWEEN_LINES + PADDING_TOP, timePaint);
     }
 
     public void updateTimeSignature(int top, int bottom){
-
-        // draw top number
-
-        // draw bottom number
+        if (bottom == 2) {
+            if (top == 4) {         // 4/2 time
+                timeSignature = "K";
+            } else if (top == 3) {  // 3/2 time
+                timeSignature = "L";
+            }
+        } else if (bottom == 4) {
+            if (top == 6) {         // 6/4 time
+                timeSignature = "^";
+            } else if (top == 5) {  // 5/4 time
+                timeSignature = "%";
+            } else if (top == 4) {  // 4/4 time
+                timeSignature = "$";
+            } else if (top == 3) {  // 3/4 time
+                timeSignature = "#";
+            } else if (top == 2) {  // 2/4 time
+                timeSignature = "@";
+            }
+        } else if (bottom == 8) {
+            if (top == 9) {         // 9/8 time
+                timeSignature = "(";
+            } else if (top == 6) {  // 6/8 time
+                timeSignature = "P";
+            } else if (top == 3) {  // 3/8 time
+                timeSignature = ")";
+            } else if (top == 2) {  // 2/8 time
+                timeSignature = "k";
+            }
+        }
     }
 }

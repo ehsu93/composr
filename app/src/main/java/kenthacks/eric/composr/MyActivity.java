@@ -33,6 +33,7 @@ public class MyActivity extends Activity {
 
     private static final String DNAME = "/composr_files";
     RecordingTask rt;
+    DrawNotes dn;
     Context mContext = this;
     String givenName = "";
     int beatsPerMeasure = 4;
@@ -59,7 +60,7 @@ public class MyActivity extends Activity {
         HEIGHT = size.y;
 
         // Draw the notes
-        DrawNotes dn = new DrawNotes(this);
+        dn = new DrawNotes(this);
         Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
         dn.draw(canvas);
@@ -75,9 +76,21 @@ public class MyActivity extends Activity {
             @Override
             public void onClick(View v) {
                 switch(beatsPerMeasure) {
-                    case(4): beats.setText("2 beats"); beatsPerMeasure = 2; break;
-                    case(3): beats.setText("4 beats"); beatsPerMeasure = 4; break;
-                    case(2): beats.setText("3 beats"); beatsPerMeasure = 3; break;
+                    case(4): beats.setText("2 beats");
+                        beatsPerMeasure = 2;
+                        dn.updateTimeSignature(2, 4);
+                        dn.invalidate();
+                        break;
+                    case(3): beats.setText("4 beats");
+                        beatsPerMeasure = 4;
+                        dn.updateTimeSignature(4, 4);
+                        dn.invalidate();
+                        break;
+                    case(2): beats.setText("3 beats");
+                        beatsPerMeasure = 3;
+                        dn.updateTimeSignature(3, 4);
+                        dn.invalidate();
+                        break;
                     default: break;
                 }
             }
