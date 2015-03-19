@@ -1,4 +1,4 @@
-package kenthacks.eric.composr;
+package eecs395.composr;
 
 /**
  * Created by meaghan on 3/4/15.

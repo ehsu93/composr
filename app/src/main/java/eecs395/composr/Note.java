@@ -1,4 +1,4 @@
-package kenthacks.eric.composr;
+package eecs395.composr;
 
 public class Note {
 
