@@ -1,4 +1,4 @@
-package kenthacks.eric.composr;
+package eecs395.composr;
 
 import java.util.Date;
 import java.util.Timer;

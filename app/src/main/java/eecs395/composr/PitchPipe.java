@@ -1,8 +1,9 @@
-package kenthacks.eric.composr;
+package eecs395.composr;
 
 import android.content.Context;
 import android.media.MediaPlayer;
-import android.widget.Toast;
+
+import eecs395.proj.composr.R;
 
 /**
  * Created by Eric on 3/5/2015.

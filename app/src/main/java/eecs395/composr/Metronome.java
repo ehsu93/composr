@@ -1,7 +1,9 @@
-package kenthacks.eric.composr;
+package eecs395.composr;
 
 import android.media.MediaPlayer;
 import android.content.Context;
+
+import eecs395.proj.composr.R;
 
 public class Metronome {
 

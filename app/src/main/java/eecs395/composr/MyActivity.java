@@ -1,4 +1,4 @@
-package kenthacks.eric.composr;
+package eecs395.composr;
 
 import android.app.Activity;
 import android.content.Context;
@@ -22,6 +22,7 @@ import be.tarsos.dsp.io.android.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import eecs395.proj.composr.R;
 
 import java.io.IOException;
 
