@@ -43,17 +43,17 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
 
-        rt = new RecordingTask(60, 4, this);
+        rt = new RecordingTask(60, beatsPerMeasure, this);
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
 
         final Button beats =  (Button) findViewById(R.id.beats);
         beats.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                switch(beatsPerMeasure) {
-                    case(4): beats.setText("2 beats"); beatsPerMeasure = 2; break;
-                    case(3): beats.setText("4 beats"); beatsPerMeasure = 4; break;
-                    case(2): beats.setText("3 beats"); beatsPerMeasure = 3; break;
+                switch(rt.getBeats()) {
+                    case(4): beats.setText("2 beats"); rt.setBeats(2); break;
+                    case(3): beats.setText("4 beats"); rt.setBeats(4); break;
+                    case(2): beats.setText("3 beats"); rt.setBeats(3); break;
                     default: break;
                 }
             }
@@ -68,6 +68,7 @@ public class MyActivity extends Activity {
                 else {
                     metronomeButton.setText("Stop Listening");
                 }
+                rt.bpm = Integer.parseInt(beats.getText().toString());
                 rt.toggleRecordingTask();
             }
         });

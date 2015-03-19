@@ -50,6 +50,13 @@ public class RecordingTask {
         this.rf = new RecordedFrequencies();
     }
 
+    public void setBeats(int beats) {
+        this.beats = beats;
+    }
+    public int getBeats(){
+        return this.beats;
+    }
+
     public void addFreq(Float freq){
         rf.addFrequency(freq);
     }
