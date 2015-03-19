@@ -1,7 +1,8 @@
-package eecs395.composr;
+package kenthacks.eric.composr;
 
 import android.content.Context;
 import android.os.Environment;
+import android.util.Log;
 import android.widget.Toast;
 
 import org.jfugue.MusicStringParser;
