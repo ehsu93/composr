@@ -95,7 +95,8 @@ public class MyActivity extends Activity {
                         break;
                     default: break;
                 }
-                dn.updateTimeSignature(beatsPerMeasure, 4);
+                dn.updateTimeSignature(beatsPerMeasure, beatDuration);
+                dn.changeClef();
                 dn.invalidate();
             }
         });
@@ -104,7 +105,7 @@ public class MyActivity extends Activity {
         metronomeButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 String buttonText = metronomeButton.getText().toString();
-                if (buttonText == "Stop Listening")
+                if (buttonText.equals("Stop Listening"))
                     metronomeButton.setText("Listen");
                 else {
                     metronomeButton.setText("Stop Listening");
@@ -157,7 +158,6 @@ public class MyActivity extends Activity {
         final MediaPlayer FSHARP = MediaPlayer.create(this, R.raw.fsharp);
         final MediaPlayer G = MediaPlayer.create(this, R.raw.g);
         final MediaPlayer GSHARP = MediaPlayer.create(this, R.raw.gsharp);
-        boolean toggle = false;
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
         aNote.setOnClickListener(new View.OnClickListener() {
@@ -243,7 +243,7 @@ public class MyActivity extends Activity {
 
                 rt.addFreq(pitchInHz);
 
-                runOnUiThread((Runnable) new Runnable() {
+                runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
                         TextView text = (TextView) findViewById(R.id.Pitch);
@@ -276,9 +276,6 @@ public class MyActivity extends Activity {
         // Handle action bar item clicks here. The action bar will automatically handle clicks on
         // the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
-        if (id == R.id.action_settings) {
-            return true;
-        }
-        return super.onOptionsItemSelected(item);
+        return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 }

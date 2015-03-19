@@ -44,6 +44,9 @@ public class DrawNotes extends View {
     /** The one-letter string that represents the current clef */
     String clef;
 
+    /** The y-offset for the current clef */
+    float clefYOffset;
+
     /**
      * Constructor to initialize all of the default values and Paint objects.
      * Default time signature is 4/4 and default clef is treble.
@@ -95,6 +98,9 @@ public class DrawNotes extends View {
 
         // set the default clef to treble
         clef = "g";
+
+        // set the default clef offset to approriate treble value
+        clefYOffset = 5.65f * SPACE_BETWEEN_LINES;
     }
 
     /**
@@ -107,7 +113,7 @@ public class DrawNotes extends View {
         drawStaff(canvas);
 
         // draw the clef on the canvas
-        canvas.drawText(clef, PADDING_LEFT, 5.65f * SPACE_BETWEEN_LINES, clefPaint);
+        canvas.drawText(clef, PADDING_LEFT, clefYOffset, clefPaint);
 
         // draw the time signature on the canvas
         canvas.drawText(timeSignature, PADDING_LEFT + SPACE_BETWEEN_LINES * 2.5f,
@@ -123,8 +129,8 @@ public class DrawNotes extends View {
     public void drawStaff(Canvas canvas){
 
         // determine Y positions of each line of the clef
-        int line1Y = PADDING_TOP + 0 * SPACE_BETWEEN_LINES;
-        int line2Y = PADDING_TOP + 1 * SPACE_BETWEEN_LINES;
+        int line1Y = PADDING_TOP;
+        int line2Y = PADDING_TOP + SPACE_BETWEEN_LINES;
         int line3Y = PADDING_TOP + 2 * SPACE_BETWEEN_LINES;
         int line4Y = PADDING_TOP + 3 * SPACE_BETWEEN_LINES;
         int line5Y = PADDING_TOP + 4 * SPACE_BETWEEN_LINES;
@@ -180,6 +186,32 @@ public class DrawNotes extends View {
             } else if (top == 2) {  // 2/8 time
                 timeSignature = "k";
             }
+        }
+    }
+
+    /**
+     * Switch the clef displayed from treble to bass or vice versa. After using this method,
+     * canvas.invalidate() must be called to update the display
+     */
+    public void changeClef(){
+        if (clef.equals("g")){
+            // decrease font size
+            clefPaint.setTextSize(4.5f * SPACE_BETWEEN_LINES);
+
+            // move upwards
+            clefYOffset = 3.7f * SPACE_BETWEEN_LINES;
+
+            // change character
+            clef = "?";
+        } else {
+            // increase font size
+            clefPaint.setTextSize(7.5f * SPACE_BETWEEN_LINES);
+
+            // move downwards
+            clefYOffset = 5.65f * SPACE_BETWEEN_LINES;
+
+            // change character
+            clef = "g";
         }
     }
 }
