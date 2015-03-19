@@ -8,6 +8,9 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.Space;
+
+import java.util.Hashtable;
 
 public class DrawNotes extends View {
 
@@ -20,20 +23,24 @@ public class DrawNotes extends View {
     /** Paint object for the time signature */
     Paint timePaint;
 
+    Paint notePaint;
+
+    Hashtable<String, Note> notes = new Hashtable<>();
+
     /** Distance between top of canvas and everything drawn */
-    final int PADDING_TOP;
+    final int PADDING_TOP = 20;
 
     /** Distance between bottom of canvas and everything drawn */
-    final int PADDING_BOTTOM;
+    //final int PADDING_BOTTOM = 20;
 
     /** Distance between left of canvas and everything drawn */
-    final int PADDING_LEFT;
+    final int PADDING_LEFT = 20;
 
     /** Distance between right of canvas and everything drawn */
-    final int PADDING_RIGHT;
+    final int PADDING_RIGHT = 20;
 
     /** Space between the lines in the staff */
-    final int SPACE_BETWEEN_LINES;
+    final int SPACE_BETWEEN_LINES = 50;
 
     /** Width of the canvas */
     final int WIDTH;
@@ -47,6 +54,11 @@ public class DrawNotes extends View {
     /** The y-offset for the current clef */
     float clefYOffset;
 
+    /** offset for everything, for ledger lines above the staff*/
+    float offset;
+
+    Symbols symbols;
+
     /**
      * Constructor to initialize all of the default values and Paint objects.
      * Default time signature is 4/4 and default clef is treble.
@@ -56,24 +68,15 @@ public class DrawNotes extends View {
     public DrawNotes(Context ctx){
         super(ctx);
 
-        // get height and width from display metrics
+        // get width from display metrics
         DisplayMetrics dm = new DisplayMetrics();
         ((Activity)ctx).getWindowManager().getDefaultDisplay().getMetrics(dm);
         WIDTH = dm.widthPixels;
 
-        // set the padding values
-        PADDING_TOP = 20;
-        PADDING_BOTTOM = 20;
-        PADDING_LEFT = 20;
-        PADDING_RIGHT = 20;
-
-        // determine space between lines
-        SPACE_BETWEEN_LINES = 50;
-
         // initiatilize staff paint
         staffPaint = new Paint();
         staffPaint.setStyle(Paint.Style.FILL);
-        staffPaint.setColor(Color.BLUE);
+        staffPaint.setColor(Color.BLACK);
         staffPaint.setStrokeWidth(3f);
 
         // get musical font
@@ -82,9 +85,16 @@ public class DrawNotes extends View {
         // initialize clef paint
         clefPaint = new Paint();
         clefPaint.setStyle(Paint.Style.FILL);
-        clefPaint.setColor(Color.RED);
+        clefPaint.setColor(Color.BLACK);
         clefPaint.setTypeface(noteTypeFace);
         clefPaint.setTextSize(7.5f * SPACE_BETWEEN_LINES);
+
+        // initialize note paint
+        notePaint = new Paint();
+        notePaint.setStyle(Paint.Style.FILL);
+        notePaint.setColor(Color.BLUE);
+        notePaint.setTypeface(noteTypeFace);
+        notePaint.setTextSize(5 * SPACE_BETWEEN_LINES);
 
         // initialize time signature paint
         timePaint = new Paint();
@@ -94,13 +104,18 @@ public class DrawNotes extends View {
         timePaint.setTextSize(5.75f * SPACE_BETWEEN_LINES);
 
         // set default time signature to 4/4 time
-        timeSignature = "$";
+        timeSignature = symbols.get("4/4");
 
         // set the default clef to treble
-        clef = "g";
+        clef = symbols.get("trebleClef");
 
         // set the default clef offset to approriate treble value
         clefYOffset = 5.65f * SPACE_BETWEEN_LINES;
+
+        // offset for ledger lines. Default is no ledger lines, hence offset = 0
+        offset = 0;
+
+        symbols = new Symbols();
     }
 
     /**
@@ -113,11 +128,33 @@ public class DrawNotes extends View {
         drawStaff(canvas);
 
         // draw the clef on the canvas
-        canvas.drawText(clef, PADDING_LEFT, clefYOffset, clefPaint);
+        canvas.drawText(clef, PADDING_LEFT, clefYOffset + offset, clefPaint);
 
         // draw the time signature on the canvas
         canvas.drawText(timeSignature, PADDING_LEFT + SPACE_BETWEEN_LINES * 2.5f,
-                4 * SPACE_BETWEEN_LINES + PADDING_TOP, timePaint);
+                4 * SPACE_BETWEEN_LINES + PADDING_TOP + offset, timePaint);
+
+        createNoteObjects();
+        drawTestNotes(canvas);
+    }
+
+    public void createNoteObjects(){
+        notes.put("E5", new Note("E5", 4.55f, symbols.get("quarterNoteStemDown")));
+        notes.put("C5", new Note("C5", 3.55f, symbols.get("quarterNoteStemDown")));
+        notes.put("A4", new Note("A4", 3.95f, symbols.get("quarterNoteStemUp")));
+        notes.put("F4", new Note("F4", 4.95f, symbols.get("quarterNoteStemUp")));
+    }
+
+    public void drawTestNotes(Canvas canvas){
+        Note e5 = notes.get("E5");
+        Note c5 = notes.get("C5");
+        Note a4 = notes.get("A4");
+        Note f4 = notes.get("F4");
+
+        canvas.drawText(e5.getSymbol(), 300, e5.getPosition() * SPACE_BETWEEN_LINES + offset, notePaint);
+        canvas.drawText(c5.getSymbol(), 400, c5.getPosition() * SPACE_BETWEEN_LINES + offset, notePaint);
+        canvas.drawText(a4.getSymbol(), 500, a4.getPosition() * SPACE_BETWEEN_LINES + offset, notePaint);
+        canvas.drawText(f4.getSymbol(), 600, f4.getPosition() * SPACE_BETWEEN_LINES + offset, notePaint);
     }
 
     /**
@@ -129,11 +166,11 @@ public class DrawNotes extends View {
     public void drawStaff(Canvas canvas){
 
         // determine Y positions of each line of the clef
-        int line1Y = PADDING_TOP;
-        int line2Y = PADDING_TOP + SPACE_BETWEEN_LINES;
-        int line3Y = PADDING_TOP + 2 * SPACE_BETWEEN_LINES;
-        int line4Y = PADDING_TOP + 3 * SPACE_BETWEEN_LINES;
-        int line5Y = PADDING_TOP + 4 * SPACE_BETWEEN_LINES;
+        float line1Y = PADDING_TOP + offset;
+        float line2Y = PADDING_TOP + SPACE_BETWEEN_LINES + offset;
+        float line3Y = PADDING_TOP + 2 * SPACE_BETWEEN_LINES + offset;
+        float line4Y = PADDING_TOP + 3 * SPACE_BETWEEN_LINES + offset;
+        float line5Y = PADDING_TOP + 4 * SPACE_BETWEEN_LINES + offset;
 
         // draw the barlines
         // inputs to drawLine: X0, Y0, X1, Y1, paint
@@ -158,35 +195,7 @@ public class DrawNotes extends View {
      * @param bottom The bottom number of the time signature
      */
     public void updateTimeSignature(int top, int bottom){
-        if (bottom == 2 ) {
-            if (top == 4) {         // 4/2 time
-                timeSignature = "K";
-            } else if (top == 3) {  // 3/2 time
-                timeSignature = "L";
-            }
-        } else if (bottom == 4) {
-            if (top == 6) {         // 6/4 time
-                timeSignature = "^";
-            } else if (top == 5) {  // 5/4 time
-                timeSignature = "%";
-            } else if (top == 4) {  // 4/4 time
-                timeSignature = "$";
-            } else if (top == 3) {  // 3/4 time
-                timeSignature = "#";
-            } else if (top == 2) {  // 2/4 time
-                timeSignature = "@";
-            }
-        } else if (bottom == 8) {
-            if (top == 9) {         // 9/8 time
-                timeSignature = "(";
-            } else if (top == 6) {  // 6/8 time
-                timeSignature = "P";
-            } else if (top == 3) {  // 3/8 time
-                timeSignature = ")";
-            } else if (top == 2) {  // 2/8 time
-                timeSignature = "k";
-            }
-        }
+        timeSignature = symbols.get(Integer.toString(top) + "/" + Integer.toString(bottom));
     }
 
     /**
@@ -202,7 +211,7 @@ public class DrawNotes extends View {
             clefYOffset = 3.7f * SPACE_BETWEEN_LINES;
 
             // change character
-            clef = "?";
+            clef = symbols.get("bassClef");
         } else {
             // increase font size
             clefPaint.setTextSize(7.5f * SPACE_BETWEEN_LINES);
@@ -211,7 +220,54 @@ public class DrawNotes extends View {
             clefYOffset = 5.65f * SPACE_BETWEEN_LINES;
 
             // change character
-            clef = "g";
+            clef = symbols.get("trebleClef");
+        }
+    }
+
+    public static class Symbols{
+
+        Hashtable<String, String> symbols;
+
+        Symbols(){
+            this.symbols = new Hashtable<String, String>() {{
+                put("trebleClef", "g");
+                put("bassClef", "?");
+
+                // notes
+                put("wholeNote", "");
+
+                put("halfNoteStemDown", "");
+                put("halfNoteStemUp", "");
+
+                put("quarterNoteStemDown", "ö");
+                put("quarterNoteStemUp", "");
+
+                put("eigthNoteStemDown", "");
+                put("eightNoteStemUp", "");
+
+                put("sixteenthNoteStemDown", "");
+                put("sixteenthNoteStemUp", "");
+
+                // time signatures
+                put("4/2", "K");
+                put("3/2", "L");
+
+                put("6/4", "^");
+                put("5/4", "%");
+                put("4/4", "$");
+                put("3/4", "#");
+                put("2/4", "@");
+
+                put("9/8", "(");
+                put("6/8", "P");
+                put("3/8", ")");
+                put("2/8", "k");
+
+            }};
+        }
+
+        String get(String k){
+            return symbols.get(k);
         }
     }
 }
