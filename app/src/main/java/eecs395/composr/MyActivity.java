@@ -22,6 +22,7 @@ import be.tarsos.dsp.io.android.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import eecs395.composr.draw.DrawNotes;
 import eecs395.proj.composr.R;
 
 import java.io.IOException;
