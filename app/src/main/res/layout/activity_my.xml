@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -7,146 +7,149 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
+    android:fillViewport="true"
     tools:context=".MyActivity"
     android:weightSum="1">
 
-    <!-- This is where the live display is drawn. It is important; don't delete it -->
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:id = "@+id/NoteDisplay">
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+        android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
+        <!-- This is where the live display is drawn. It is important; don't delete it -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:id = "@+id/NoteDisplay">
+        </LinearLayout>
 
-        <Button
-            android:text="4 beats"
-            android:id = "@+id/beats"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <EditText
-            android:id = "@+id/Tempo"
-            android:hint = "Tempo"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id = "@+id/Pitch"
-            android:text="Pitch Frequency"
-            android:layout_width="match_parent"
-            android:gravity="center"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id ="@+id/Note"
-            android:text="Note name"
-            android:gravity="center"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id = "@+id/Toggle"
-            android:text="Listen"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <EditText
-            android:id = "@+id/musicName"
-            android:hint="Enter music name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <Button
-            android:id="@+id/makeMusic"
-            android:text="Export to MusicXML"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-
-        <TextView
-            android:id = "@+id/frequencyArray"
-            android:text="0"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="30dp"
-            android:layout_weight="0.26" />
+            android:orientation="vertical">
 
-        <TextView
+            <Button
+                android:text="4 beats"
+                android:id = "@+id/beats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
+            <EditText
+                android:id = "@+id/Tempo"
+                android:hint = "Tempo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
 
-            android:id = "@+id/PitchPipe"
-            android:text="Pitch Pipe"
-            android:layout_width="match_parent"
-            android:gravity="center"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:id = "@+id/Pitch"
+                android:text="Pitch Frequency"
+                android:layout_width="match_parent"
+                android:gravity="center"
+                android:layout_height="wrap_content" />
 
-        <Button
-            android:id="@+id/a"
-            android:text="a"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/aSharp"
-            android:text="a#"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/b"
-            android:text="b"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/c"
-            android:text="c"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/cSharp"
-            android:text="c#"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/d"
-            android:text="d"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/dSharp"
-            android:text="d#"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/e"
-            android:text="e"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/f"
-            android:text="f"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/fSharp"
-            android:text="f#"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/g"
-            android:text="g"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        <Button
-            android:id="@+id/gSharp"
-            android:text="g#"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            <TextView
+                android:id ="@+id/Note"
+                android:text="Note name"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id = "@+id/Toggle"
+                android:text="Listen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id = "@+id/musicName"
+                android:hint="Enter music name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/makeMusic"
+                android:text="Export to MusicXML"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id = "@+id/frequencyArray"
+                android:text="0"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="30dp"
+                android:layout_weight="0.26" />
+
+            <TextView
 
 
+                android:id = "@+id/PitchPipe"
+                android:text="Pitch Pipe"
+                android:layout_width="match_parent"
+                android:gravity="center"
+                android:layout_height="wrap_content" />
 
+            <Button
+                android:id="@+id/a"
+                android:text="a"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/aSharp"
+                android:text="a#"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/b"
+                android:text="b"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/c"
+                android:text="c"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/cSharp"
+                android:text="c#"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/d"
+                android:text="d"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/dSharp"
+                android:text="d#"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/e"
+                android:text="e"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/f"
+                android:text="f"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/fSharp"
+                android:text="f#"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/g"
+                android:text="g"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+            <Button
+                android:id="@+id/gSharp"
+                android:text="g#"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+        </LinearLayout>
     </LinearLayout>
-</LinearLayout>
+</ScrollView>

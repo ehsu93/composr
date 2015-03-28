@@ -72,6 +72,9 @@ public class DrawNotes extends View {
         ((Activity)ctx).getWindowManager().getDefaultDisplay().getMetrics(dm);
         WIDTH = dm.widthPixels;
 
+        // initialize symbols before needing to get any
+        symbols = new Symbols();
+
         // initiatilize staff paint
         staffPaint = new Paint();
         staffPaint.setStyle(Paint.Style.FILL);
@@ -113,8 +116,6 @@ public class DrawNotes extends View {
 
         // offset for ledger lines. Default is no ledger lines, hence offset = 0
         offset = 0;
-
-        symbols = new Symbols();
     }
 
     /**

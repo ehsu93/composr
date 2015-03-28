@@ -254,9 +254,9 @@ public class MyActivity extends Activity {
                         TextView text2 = (TextView) findViewById(R.id.Note);
                         text2.setText("" + note);
 
-                        TextView text3 = (TextView) findViewById(R.id.frequencyArray);
-                        String newtext = rt.displayPattern;
-                        text3.setText(newtext);
+                        //TextView text3 = (TextView) findViewById(R.id.frequencyArray);
+                        //String newtext = rt.displayPattern;
+                        //text3.setText(newtext);
                     }
                 });
             }
