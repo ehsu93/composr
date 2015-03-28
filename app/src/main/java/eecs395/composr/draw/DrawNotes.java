@@ -1,4 +1,4 @@
-package eecs395.composr;
+package eecs395.composr.draw;
 
 import android.app.Activity;
 import android.content.Context;
@@ -9,7 +9,13 @@ import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.view.View;
 
+import com.opencsv.CSVReader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Hashtable;
+import java.util.List;
 
 public class DrawNotes extends View {
 
@@ -22,9 +28,14 @@ public class DrawNotes extends View {
     /** Paint object for the time signature */
     Paint timePaint;
 
+    /** Paint object for the notes */
     Paint notePaint;
 
-    Hashtable<String, Note> notes = new Hashtable<>();
+    /** Stores all of the Note objects */
+    Hashtable<String, Note> notes;
+
+    /** Stores all of the symbol/name pairs */
+    Symbols symbols;
 
     /** Distance between top of canvas and everything drawn */
     final int PADDING_TOP = 20;
@@ -56,7 +67,8 @@ public class DrawNotes extends View {
     /** offset for everything, for ledger lines above the staff*/
     float offset;
 
-    Symbols symbols;
+    /** The context of the application */
+    Context ctx;
 
     /**
      * Constructor to initialize all of the default values and Paint objects.
@@ -66,6 +78,9 @@ public class DrawNotes extends View {
      */
     public DrawNotes(Context ctx){
         super(ctx);
+
+        // initialize Symbols object
+        Symbols symbols = new Symbols();
 
         // get width from display metrics
         DisplayMetrics dm = new DisplayMetrics();
@@ -116,6 +131,9 @@ public class DrawNotes extends View {
 
         // offset for ledger lines. Default is no ledger lines, hence offset = 0
         offset = 0;
+
+        // save the context as a field
+        this.ctx = ctx;
     }
 
     /**
@@ -134,27 +152,51 @@ public class DrawNotes extends View {
         canvas.drawText(timeSignature, PADDING_LEFT + SPACE_BETWEEN_LINES * 2.5f,
                 4 * SPACE_BETWEEN_LINES + PADDING_TOP + offset, timePaint);
 
-        createNoteObjects();
+        // populates the notes hashtable
+        createNoteObjects(ctx);
+
+        // to test that drawing a note will work
         drawTestNotes(canvas);
     }
 
-    public void createNoteObjects(){
-        notes.put("E5", new Note("E5", 4.55f, symbols.get("quarterNoteStemDown")));
-        notes.put("C5", new Note("C5", 3.55f, symbols.get("quarterNoteStemDown")));
-        notes.put("A4", new Note("A4", 3.95f, symbols.get("quarterNoteStemUp")));
-        notes.put("F4", new Note("F4", 4.95f, symbols.get("quarterNoteStemUp")));
+    public void createNoteObjects(Context c){
+        try {
+
+            // initialize field
+            notes = new Hashtable<>();
+
+            // open notes.csv file, create CSVReader
+            InputStream is = c.getAssets().open("notes.csv");
+            CSVReader reader = new CSVReader(new InputStreamReader(is));
+
+            // creates a list of arrays representing each row in the CSV
+            List<String[]> notesList = reader.readAll();
+
+            // populate notes hashtable
+            for (String[] note : notesList) {
+                String name = note[0];
+                String clefPref = note[1];
+                int trebleLedgers = Integer.parseInt(note[2]);
+                int bassLedgers = Integer.parseInt(note[3]);
+                String spaceOrLine = note[4];
+                int index = Integer.parseInt(note[5]);
+
+                notes.put(name, new Note(name, clefPref, trebleLedgers, bassLedgers, spaceOrLine,
+                        index));
+
+            }
+
+        } catch (IOException e) {
+            // this really should never happen tho
+            // TODO: push error to application?
+        }
+
     }
 
     public void drawTestNotes(Canvas canvas){
-        Note e5 = notes.get("E5");
-        Note c5 = notes.get("C5");
-        Note a4 = notes.get("A4");
-        Note f4 = notes.get("F4");
-
-        canvas.drawText(e5.getSymbol(), 300, e5.getPosition() * SPACE_BETWEEN_LINES + offset, notePaint);
-        canvas.drawText(c5.getSymbol(), 400, c5.getPosition() * SPACE_BETWEEN_LINES + offset, notePaint);
-        canvas.drawText(a4.getSymbol(), 500, a4.getPosition() * SPACE_BETWEEN_LINES + offset, notePaint);
-        canvas.drawText(f4.getSymbol(), 600, f4.getPosition() * SPACE_BETWEEN_LINES + offset, notePaint);
+        Note d5 = notes.get("D5");
+        canvas.drawText(d5.getSymbol(clef), 300, d5.getPosition(clef, SPACE_BETWEEN_LINES)+ offset,
+                notePaint);
     }
 
     /**
@@ -165,20 +207,13 @@ public class DrawNotes extends View {
      */
     public void drawStaff(Canvas canvas){
 
-        // determine Y positions of each line of the clef
-        float line1Y = PADDING_TOP + offset;
-        float line2Y = PADDING_TOP + SPACE_BETWEEN_LINES + offset;
-        float line3Y = PADDING_TOP + 2 * SPACE_BETWEEN_LINES + offset;
-        float line4Y = PADDING_TOP + 3 * SPACE_BETWEEN_LINES + offset;
-        float line5Y = PADDING_TOP + 4 * SPACE_BETWEEN_LINES + offset;
+        for (int i = 0; i < 5; i++){
+            // determine the y position of the line
+            float y = PADDING_TOP + i * SPACE_BETWEEN_LINES + offset;
 
-        // draw the barlines
-        // inputs to drawLine: X0, Y0, X1, Y1, paint
-        canvas.drawLine(PADDING_LEFT, line1Y, WIDTH - PADDING_RIGHT, line1Y, staffPaint);
-        canvas.drawLine(PADDING_LEFT, line2Y, WIDTH - PADDING_RIGHT, line2Y, staffPaint);
-        canvas.drawLine(PADDING_LEFT, line3Y, WIDTH - PADDING_RIGHT, line3Y, staffPaint);
-        canvas.drawLine(PADDING_LEFT, line4Y, WIDTH - PADDING_RIGHT, line4Y, staffPaint);
-        canvas.drawLine(PADDING_LEFT, line5Y, WIDTH - PADDING_RIGHT, line5Y, staffPaint);
+            // inputs to drawLine: X0, Y0, X1, Y1, paint
+            canvas.drawLine(PADDING_LEFT, y, WIDTH - PADDING_RIGHT, y, staffPaint);
+        }
     }
 
     /**
@@ -224,50 +259,4 @@ public class DrawNotes extends View {
         }
     }
 
-    public static class Symbols{
-
-        Hashtable<String, String> symbols;
-
-        Symbols(){
-            this.symbols = new Hashtable<String, String>() {{
-                put("trebleClef", "g");
-                put("bassClef", "?");
-
-                // notes
-                put("wholeNote", "");
-
-                put("halfNoteStemDown", "");
-                put("halfNoteStemUp", "");
-
-                put("quarterNoteStemDown", "ö");
-                put("quarterNoteStemUp", "");
-
-                put("eigthNoteStemDown", "");
-                put("eightNoteStemUp", "");
-
-                put("sixteenthNoteStemDown", "");
-                put("sixteenthNoteStemUp", "");
-
-                // time signatures
-                put("4/2", "K");
-                put("3/2", "L");
-
-                put("6/4", "^");
-                put("5/4", "%");
-                put("4/4", "$");
-                put("3/4", "#");
-                put("2/4", "@");
-
-                put("9/8", "(");
-                put("6/8", "P");
-                put("3/8", ")");
-                put("2/8", "k");
-
-            }};
-        }
-
-        String get(String k){
-            return symbols.get(k);
-        }
-    }
 }
