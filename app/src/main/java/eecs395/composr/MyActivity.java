@@ -38,7 +38,7 @@ public class MyActivity extends Activity {
     DrawNotes dn;
 
     /** mContext */
-    Context mContext = this;
+    private static Context mContext;
 
     /** Default name of file */
     String givenName = "";
@@ -50,7 +50,7 @@ public class MyActivity extends Activity {
     int beatDuration = 4;
 
     /** Store the bpm */
-    int bpm = 60;
+    int bpm = 100;
 
     int HEIGHT;
     int WIDTH;
@@ -61,6 +61,8 @@ public class MyActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
         LinearLayout noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
+
+        mContext = this;
 
         // get height and width of screen
         Display display = getWindowManager().getDefaultDisplay();
@@ -78,7 +80,7 @@ public class MyActivity extends Activity {
         noteLayout.addView(dn);
 
         // initialize RecordingTask object, default
-        rt = new RecordingTask(bpm, 4, this);
+        rt = new RecordingTask(bpm, 4);
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
 
         final Button beats =  (Button) findViewById(R.id.beats);
@@ -113,7 +115,7 @@ public class MyActivity extends Activity {
                 else {
                     metronomeButton.setText("Stop Listening");
                 }
-                rt.bpm = Integer.parseInt(beats.getText().toString());
+                rt.bpm = beatsPerMeasure;
                 rt.toggleRecordingTask();
             }
         });
@@ -281,5 +283,9 @@ public class MyActivity extends Activity {
         // the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
+    }
+
+    public static Context getContext(){
+        return mContext;
     }
 }

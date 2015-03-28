@@ -24,17 +24,9 @@ public class FrequencyAnalyzer {
     private Float[] FREQUENCIES;
 
     /**
-     * Application context, required to access assets
-     */
-    Context c;
-
-    /**
      * Creates a FrequencyRecorder object given the application context
-     *
-     * @param c Application context, required to access assets
      */
-    public FrequencyAnalyzer(Context c) {
-        this.c = c;
+    public FrequencyAnalyzer() {
         initializeMidiValues();
     }
 
@@ -50,7 +42,7 @@ public class FrequencyAnalyzer {
             FREQUENCIES = new Float[88];
 
             // open note_frequencies file, create CSVReader
-            InputStream is = c.getAssets().open("note_frequencies.csv");
+            InputStream is = MyActivity.getContext().getAssets().open("note_frequencies.csv");
             CSVReader reader = new CSVReader(new InputStreamReader(is));
 
             // all the note, frequency pairs from the CSV

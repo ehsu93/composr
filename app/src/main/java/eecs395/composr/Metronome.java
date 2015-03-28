@@ -11,11 +11,9 @@ public class Metronome {
 
     /**
      * Constructor for metronome object
-     *
-     * @param ctx Context, required to play sound
      */
-    public Metronome(Context ctx){
-        this.m = MediaPlayer.create(ctx, R.raw.tick);
+    public Metronome(){
+        this.m = MediaPlayer.create(MyActivity.getContext(), R.raw.tick);
     }
 
     /**
