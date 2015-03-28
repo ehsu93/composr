@@ -59,12 +59,6 @@ public class RecordingTask {
         this.previousFreq = 0f;
     }
 
-    public void setBeats(int beats) {
-        this.beats = beats;
-    }
-    public int getBeats(){
-        return this.beats;
-    }
 
     public void addFreq(Float freq){
         count++;

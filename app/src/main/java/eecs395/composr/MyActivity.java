@@ -76,24 +76,14 @@ public class MyActivity extends Activity {
         dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
         noteLayout.addView(dn);
 
-<<<<<<< HEAD:app/src/main/java/kenthacks/eric/composr/MyActivity.java
-        rt = new RecordingTask(60, beatsPerMeasure, this);
-=======
         // initialize RecordingTask object, default
         rt = new RecordingTask(bpm, 4, this);
->>>>>>> origin/master:app/src/main/java/eecs395/composr/MyActivity.java
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
 
         final Button beats =  (Button) findViewById(R.id.beats);
         beats.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-<<<<<<< HEAD:app/src/main/java/kenthacks/eric/composr/MyActivity.java
-                switch(rt.getBeats()) {
-                    case(4): beats.setText("2 beats"); rt.setBeats(2); break;
-                    case(3): beats.setText("4 beats"); rt.setBeats(4); break;
-                    case(2): beats.setText("3 beats"); rt.setBeats(3); break;
-=======
                 switch(beatsPerMeasure) {
                     case(4): beats.setText("2 beats");
                         beatsPerMeasure = 2;
@@ -104,8 +94,8 @@ public class MyActivity extends Activity {
                     case(2): beats.setText("3 beats");
                         beatsPerMeasure = 3;
                         break;
->>>>>>> origin/master:app/src/main/java/eecs395/composr/MyActivity.java
-                    default: break;
+                    default:
+                        break;
                 }
                 dn.updateTimeSignature(beatsPerMeasure, beatDuration);
                 dn.changeClef();
