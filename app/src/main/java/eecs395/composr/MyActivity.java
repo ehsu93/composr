@@ -22,7 +22,7 @@ import be.tarsos.dsp.io.android.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
-import eecs395.composr.draw.DrawNotes;
+import eecs395.composr.draw.Drawer;
 import eecs395.proj.composr.R;
 
 import java.io.IOException;
@@ -35,7 +35,7 @@ public class MyActivity extends Activity {
     RecordingTask rt;
 
     /** DrawNotes instance */
-    DrawNotes dn;
+    Drawer dn;
 
     /** mContext */
     private static Context mContext;
@@ -72,7 +72,7 @@ public class MyActivity extends Activity {
         HEIGHT = size.y;
 
         // Draw the notes
-        dn = new DrawNotes(this);
+        dn = new Drawer(this);
         Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
         dn.draw(canvas);
@@ -100,23 +100,26 @@ public class MyActivity extends Activity {
                     default:
                         break;
                 }
+
+                rt.updateTimeSignature(beatsPerMeasure, beatDuration);
                 dn.updateTimeSignature(beatsPerMeasure, beatDuration);
-                dn.changeClef();
-                dn.invalidate();
+
+                dn.invalidate(); // redraws the canvas
             }
         });
 
-        final Button metronomeButton = (Button) findViewById(R.id.Toggle);
-        metronomeButton.setOnClickListener(new View.OnClickListener() {
+        final Button listenButton = (Button) findViewById(R.id.Toggle);
+        listenButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                String buttonText = metronomeButton.getText().toString();
+                String buttonText = listenButton.getText().toString();
                 if (buttonText.equals("Stop Listening"))
-                    metronomeButton.setText("Listen");
+                    listenButton.setText("Listen");
+
                 else {
-                    metronomeButton.setText("Stop Listening");
+                    listenButton.setText("Stop Listening");
                 }
-                rt.bpm = beatsPerMeasure;
                 rt.toggleRecordingTask();
+                dn.toggleScrolling();
             }
         });
 

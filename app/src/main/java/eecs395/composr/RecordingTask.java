@@ -9,7 +9,8 @@ public class RecordingTask {
 
     // given as user inputs
     int bpm;
-    int beatsPerMeasure;
+    int beatsPerMeasure;    // top of time signature
+    int beatDuration;       // bottom of time signature
     int samplesPerBeat;
 
     // initial values
@@ -128,7 +129,7 @@ public class RecordingTask {
             this.task = createTimerTask();
 
             this.currentPosition = new SampleBeatPair();
-            this.timer.schedule(this.task, new Date(), (6000/bpm)/samplesPerBeat);
+            this.timer.schedule(this.task, new Date(), (60000/bpm)/samplesPerBeat);
         }
 
         else {
@@ -254,6 +255,13 @@ public class RecordingTask {
             currentPosition.incrementMeasure();
             processEndOfMeasure();
         }
+    }
+
+    public void updateTimeSignature(int beatsPerMeasure, int beatDuration){
+        this.beatsPerMeasure = beatsPerMeasure;
+        this.beatDuration = beatDuration;
+
+
     }
 
 }

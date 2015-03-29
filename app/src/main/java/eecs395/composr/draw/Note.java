@@ -135,7 +135,7 @@ public class Note {
     public boolean isStemDown(String clef){
 
         // treble clef: B4 and higher are stem down, A4 and lower are stem up
-        if (clef.equals("trebleClef")){
+        if (clef.equals(symbols.get("trebleClef"))){
             return this.higherThan(new Note("A4"));
         }
         // bass clef: D4 and higher are stem down, C3 and lower are stem up

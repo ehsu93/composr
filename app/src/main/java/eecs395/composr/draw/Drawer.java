@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import com.opencsv.CSVReader;
@@ -17,7 +18,9 @@ import java.io.InputStreamReader;
 import java.util.Hashtable;
 import java.util.List;
 
-public class DrawNotes extends View {
+import eecs395.composr.MyActivity;
+
+public class Drawer extends View {
 
     /** Paint object for the staff */
     Paint staffPaint;
@@ -67,8 +70,15 @@ public class DrawNotes extends View {
     /** offset for everything, for ledger lines above the staff*/
     float offset;
 
-    /** The context of the application */
-    Context ctx;
+    float currentX;
+
+    /** The canvas */
+    Canvas canvas;
+
+    /** Indicates whether or not music is scrolling */
+    boolean scrolling;
+
+    float xoffset = 0;
 
     /**
      * Constructor to initialize all of the default values and Paint objects.
@@ -76,19 +86,19 @@ public class DrawNotes extends View {
      *
      * @param ctx The application context
      */
-    public DrawNotes(Context ctx){
+    public Drawer(Context ctx){
         super(ctx);
 
         // initialize Symbols object
-        Symbols symbols = new Symbols();
+        symbols = new Symbols();
+
+        currentX = PADDING_LEFT;
+        xoffset = 0;
 
         // get width from display metrics
         DisplayMetrics dm = new DisplayMetrics();
         ((Activity)ctx).getWindowManager().getDefaultDisplay().getMetrics(dm);
         WIDTH = dm.widthPixels;
-
-        // initialize symbols before needing to get any
-        symbols = new Symbols();
 
         // initiatilize staff paint
         staffPaint = new Paint();
@@ -131,9 +141,6 @@ public class DrawNotes extends View {
 
         // offset for ledger lines. Default is no ledger lines, hence offset = 0
         offset = 0;
-
-        // save the context as a field
-        this.ctx = ctx;
     }
 
     /**
@@ -143,30 +150,39 @@ public class DrawNotes extends View {
      * @param canvas The canvas object to be drawn on
      */
     public void onDraw(Canvas canvas){
-        drawStaff(canvas);
+        this.canvas = canvas;
+
+        currentX = PADDING_LEFT - xoffset;
+        if (scrolling){
+            xoffset--;
+        }
+
+        drawStaff();
 
         // draw the clef on the canvas
-        canvas.drawText(clef, PADDING_LEFT, clefYOffset + offset, clefPaint);
+        canvas.drawText(clef, currentX, clefYOffset + offset, clefPaint);
+        currentX += 150;
 
         // draw the time signature on the canvas
-        canvas.drawText(timeSignature, PADDING_LEFT + SPACE_BETWEEN_LINES * 2.5f,
+        canvas.drawText(timeSignature, currentX,
                 4 * SPACE_BETWEEN_LINES + PADDING_TOP + offset, timePaint);
+        currentX += 150;
 
         // populates the notes hashtable
-        createNoteObjects(ctx);
+        createNoteObjects();
 
         // to test that drawing a note will work
-        drawTestNotes(canvas);
+        test();
     }
 
-    public void createNoteObjects(Context c){
+    public void createNoteObjects(){
         try {
 
             // initialize field
             notes = new Hashtable<>();
 
             // open notes.csv file, create CSVReader
-            InputStream is = c.getAssets().open("notes.csv");
+            InputStream is = MyActivity.getContext().getAssets().open("notes.csv");
             CSVReader reader = new CSVReader(new InputStreamReader(is));
 
             // creates a list of arrays representing each row in the CSV
@@ -193,19 +209,38 @@ public class DrawNotes extends View {
 
     }
 
-    public void drawTestNotes(Canvas canvas){
-        Note d5 = notes.get("D5");
-        canvas.drawText(d5.getSymbol(clef), 300, d5.getPosition(clef, SPACE_BETWEEN_LINES)+ offset,
+    public void test(){
+        String[] notesToDraw =  {"D5", "C5", "D4", "E5"};
+        drawNotes(notesToDraw);
+
+        drawBarLine();
+    }
+
+    public void drawNotes(String[] notesToDraw){
+        for (String noteString : notesToDraw){
+            Note note = notes.get(noteString);
+            drawNote(note);
+        }
+    }
+
+    public void drawNote(Note note){
+
+        canvas.drawText(note.getSymbol(clef), currentX, note.getPosition(clef, SPACE_BETWEEN_LINES) + offset,
                 notePaint);
+
+        currentX += 150;
+    }
+
+    public void drawBarLine(){
+        canvas.drawLine(currentX, PADDING_TOP, currentX, PADDING_TOP + 4 * SPACE_BETWEEN_LINES, staffPaint);
     }
 
     /**
      * Draws the staff onto the canvas, called by onDraw. Uses the values set in the constructor for
      * padding and space between lines
      *
-     * @param canvas The canvas object to be drawn on
      */
-    public void drawStaff(Canvas canvas){
+    public void drawStaff(){
 
         for (int i = 0; i < 5; i++){
             // determine the y position of the line
@@ -257,6 +292,10 @@ public class DrawNotes extends View {
             // change character
             clef = symbols.get("trebleClef");
         }
+    }
+
+    public void toggleScrolling(){
+        this.scrolling = true;
     }
 
 }
