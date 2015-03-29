@@ -33,6 +33,7 @@ public class RecordingTask {
     Metronome metronome;
     FrequencyAnalyzer fr;
     RecordedFrequencies rf;
+    Drawer d;
 
     // created by toggle
     Timer timer;
@@ -44,9 +45,10 @@ public class RecordingTask {
     int end;
     int count;
 
-    public RecordingTask(int tempo, int beats){
+    public RecordingTask(int tempo, int beats, Drawer d){
         this.bpm = tempo;
         this.beatsPerMeasure = beats;
+        this.d = d;
 
         // determines the accuracy of the application
         this.samplesPerBeat = 4;
@@ -93,7 +95,7 @@ public class RecordingTask {
                                 "\n\tprevious note: " +
                                 "\n\tsamples: " + Integer.toString(sameNoteStreak));
                         updatePattern(note, sameNoteStreak);
-                        //updateDisplayPattern(note);
+                        updateDisplay(note, sameNoteStreak);
 
                         // reset same note streak
                         sameNoteStreak = 0;
@@ -201,12 +203,12 @@ public class RecordingTask {
 
     }
 
-    public void updateDisplayPattern(String note, String duration){
+    public void updateDisplay(String note, int duration){
         if (note == "R"){
             // TODO find a different way to represent different length rests
-            displayPattern += "- ";
+            d.drawRest(getDurationString(duration));
         } else {
-            displayPattern += note + duration + " ";
+            d.drawNote(note, getDurationString(duration));
         }
 
         if (displayPattern.length() > 20) {
@@ -215,7 +217,7 @@ public class RecordingTask {
     }
 
     public void updateDisplayPattern(String note){
-        updateDisplayPattern(note, "");
+        //updateDisplay(note, 1);
     }
 
     public void truncateDisplayPattern(){

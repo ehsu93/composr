@@ -1,18 +1,22 @@
 package eecs395.composr;
 
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -28,14 +32,17 @@ import eecs395.proj.composr.R;
 import java.io.IOException;
 
 public class MyActivity extends Activity {
-
-    //private static final String DNAME = "/composr_files";
-
     /** RecordingTask instance */
     RecordingTask rt;
 
     /** DrawNotes instance */
     Drawer dn;
+
+    /** Pitch pipe instance */
+    PitchPipe pipe;
+
+    /** Pattern object */
+    PatternToMUSICXML pa;
 
     /** mContext */
     private static Context mContext;
@@ -52,6 +59,7 @@ public class MyActivity extends Activity {
     /** Store the bpm */
     int bpm = 100;
 
+    /** Store the height and width */
     int HEIGHT;
     int WIDTH;
 
@@ -59,7 +67,9 @@ public class MyActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
+
         setContentView(R.layout.activity_my);
+
         LinearLayout noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
 
         mContext = this;
@@ -71,7 +81,7 @@ public class MyActivity extends Activity {
         WIDTH = size.x;
         HEIGHT = size.y;
 
-        // Draw the notes
+        // Initialize drawer to draw anything necessary on the canvas
         dn = new Drawer(this);
         Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
@@ -79,172 +89,74 @@ public class MyActivity extends Activity {
         dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
         noteLayout.addView(dn);
 
-        // initialize RecordingTask object, default
-        rt = new RecordingTask(bpm, 4);
-        final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
+        // initialize RecordingTask object, default values
+        // THE SECOND VALUE SHOULD STAY AT 4. THAT IS THE DEFAULT NUMBER OF BEATS IN A MEASURE.
+        // IT CAN BE CHANGED WHEN THE NUMBER OF BEATS IS CHANGED, DO NOT CHANGE IT HERE WITHOUT
+        // A GOOD REASON.
+        rt = new RecordingTask(bpm, 4, dn); // see comment before changing
+
+        // initialize object that converts pattern to MusicXML
+        pa = new PatternToMUSICXML();
 
         final Button beats =  (Button) findViewById(R.id.beats);
-        beats.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                switch(beatsPerMeasure) {
-                    case(4): beats.setText("2 beats");
-                        beatsPerMeasure = 2;
-                        break;
-                    case(3): beats.setText("4 beats");
-                        beatsPerMeasure = 4;
-                        break;
-                    case(2): beats.setText("3 beats");
-                        beatsPerMeasure = 3;
-                        break;
-                    default:
-                        break;
-                }
-
-                rt.updateTimeSignature(beatsPerMeasure, beatDuration);
-                dn.updateTimeSignature(beatsPerMeasure, beatDuration);
-
-                dn.invalidate(); // redraws the canvas
-            }
-        });
+        beats.setOnClickListener(getBeatsListener(beats));
 
         final Button listenButton = (Button) findViewById(R.id.Toggle);
-        listenButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String buttonText = listenButton.getText().toString();
-                if (buttonText.equals("Stop Listening"))
-                    listenButton.setText("Listen");
-
-                else {
-                    listenButton.setText("Stop Listening");
-                }
-
-                dn.scrollLeft(50);
-                rt.toggleRecordingTask();
-                dn.invalidate();
-            }
-        });
+        listenButton.setOnClickListener(getListenListener(listenButton));
 
         final Button musicButton = (Button) findViewById(R.id.makeMusic);
-        musicButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
-                TextView name = (TextView) findViewById(R.id.musicName);
-                givenName = name.getText().toString();
-                try {
-                    pa.write(rt.pattern, givenName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        });
+        musicButton.setOnClickListener(getMusicButtonListener(musicButton));
 
-        //PITCH PIPE PART, TODO: NEED TO CLEAN UP LATER
-
-        final PitchPipe pipe = new PitchPipe(this, "A");
-
-        final Button aNote = (Button) findViewById(R.id.a);
-        final Button aSharpNote = (Button) findViewById(R.id.aSharp);
-        final Button bNote = (Button) findViewById(R.id.b);
-        final Button cNote = (Button) findViewById(R.id.c);
-        final Button cSharpNote = (Button) findViewById(R.id.cSharp);
-        final Button dNote = (Button) findViewById(R.id.d);
-        final Button dSharpNote = (Button) findViewById(R.id.dSharp);
-        final Button eNote = (Button) findViewById(R.id.e);
-        final Button fNote = (Button) findViewById(R.id.f);
-        final Button fSharpNote = (Button) findViewById(R.id.fSharp);
-        final Button gNote = (Button) findViewById(R.id.g);
-        final Button gSharpNote = (Button) findViewById(R.id.gSharp);
-
-        final MediaPlayer A = MediaPlayer.create(this, R.raw.a);
-        final MediaPlayer ASHARP = MediaPlayer.create(this, R.raw.asharp);
-        final MediaPlayer B = MediaPlayer.create(this, R.raw.b);
-        final MediaPlayer C = MediaPlayer.create(this, R.raw.c);
-        final MediaPlayer CSHARP = MediaPlayer.create(this, R.raw.csharp);
-        final MediaPlayer D = MediaPlayer.create(this, R.raw.d);
-        final MediaPlayer DSHARP = MediaPlayer.create(this, R.raw.dsharp);
-        final MediaPlayer E = MediaPlayer.create(this, R.raw.e);
-        final MediaPlayer F = MediaPlayer.create(this, R.raw.f);
-        final MediaPlayer FSHARP = MediaPlayer.create(this, R.raw.fsharp);
-        final MediaPlayer G = MediaPlayer.create(this, R.raw.g);
-        final MediaPlayer GSHARP = MediaPlayer.create(this, R.raw.gsharp);
+        pipe = new PitchPipe();
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
-        aNote.setOnClickListener(new View.OnClickListener() {
+        final Dialog dialog = new Dialog(MyActivity.this);
+        dialog.setContentView(R.layout.pitchpipe);
+        dialog.setTitle(R.string.pitch_pipe);
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(A);
-            }
-        });
-        aSharpNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(ASHARP);
-            }
-        });
-        bNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(B);
-            }
-        });
-        cNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(C);
-            }
-        });
-        cSharpNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(CSHARP);
-            }
-        });
-        dNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(D);
-            }
-        });
-        dSharpNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(DSHARP);
-            }
-        });
-        eNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(E);
-            }
-        });
-        fNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(F);
-            }
-        });
-        fSharpNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(FSHARP);
-            }
-        });
-        gNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(G);
-            }
-        });
-        gSharpNote.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                pipe.togglePlayTest(GSHARP);
+            public void onDismiss(DialogInterface dialog) {
+                pipe.stop();
             }
         });
 
-        //PITCH PIPE END
+        // override onclick listener of positive button
+        // initialize spinner with adapter
+        Spinner spinner = (Spinner) dialog.findViewById(R.id.pitchpipe_spinner);
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.pitch_pipe_values, android.R.layout.simple_spinner_item);
+
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                pipe.play(pos);
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+
+        final Button pitchPipeButton = (Button) findViewById(R.id.pitchPipeButton);
+        pitchPipeButton.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                dialog.show();
+            }
+        });
+
+        final Button stopPitchPipe = (Button) dialog.findViewById(R.id.stop_pitchpipe);
+        stopPitchPipe.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                pipe.stop();
+            }
+        });
 
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
             @Override
@@ -272,7 +184,6 @@ public class MyActivity extends Activity {
             }
         }));
 
-
         new Thread(dispatcher, "Audio Dispatcher").start();
 
     }
@@ -294,5 +205,68 @@ public class MyActivity extends Activity {
 
     public static Context getContext(){
         return mContext;
+    }
+
+    public View.OnClickListener getBeatsListener(final Button beats){
+
+        // create and return a new OnClickListener object
+        return new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                switch(beatsPerMeasure) {
+                    case(4): beats.setText("2 beats");
+                        beatsPerMeasure = 2;
+                        break;
+                    case(3): beats.setText("4 beats");
+                        beatsPerMeasure = 4;
+                        break;
+                    case(2): beats.setText("3 beats");
+                        beatsPerMeasure = 3;
+                        break;
+                    default:
+                        break;
+                }
+
+                rt.updateTimeSignature(beatsPerMeasure, beatDuration);
+                dn.updateTimeSignature(beatsPerMeasure, beatDuration);
+
+                dn.invalidate(); // redraws the canvas
+            }
+        };
+    }
+
+    public View.OnClickListener getListenListener(final Button listenButton){
+        return new View.OnClickListener() {
+            public void onClick(View v) {
+                String buttonText = listenButton.getText().toString();
+                if (buttonText.equals("Stop Listening"))
+                    listenButton.setText("Listen");
+
+                else {
+                    listenButton.setText("Stop Listening");
+                }
+
+                dn.scrollLeft(50);
+                rt.toggleRecordingTask();
+                dn.invalidate();
+            }
+        };
+    }
+
+    public View.OnClickListener getMusicButtonListener(final Button musicButton){
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
+                TextView name = (TextView) findViewById(R.id.musicName);
+                givenName = name.getText().toString();
+                try {
+                    pa.write(rt.pattern, givenName);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        };
     }
 }

@@ -26,6 +26,16 @@ public class Symbols {
             put("sixteenthNoteStemDown", "");
             put("sixteenthNoteStemUp", "");
 
+            // rests
+            put("wholeRest", "^");      // 16
+            put("halfRest", "O");       // 8
+            put("halfRestdot", "K");    // 12
+            put("quarterRest", "X");    // 4
+            put("quarterRestDot", "Q"); // 6
+            put("eighthRest", "L");     // 2
+            put("eighthRestDot", "P");  // 3
+            put("sixteenthRest", "Z");  // 1
+
             // time signatures
             put("4/2", "K");
             put("3/2", "L");

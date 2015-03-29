@@ -14,7 +14,9 @@
     <LinearLayout
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:focusable="true"
+        android:focusableInTouchMode="true">
 
         <!-- This is where the live display is drawn. It is important; don't delete it -->
         <LinearLayout
@@ -81,75 +83,12 @@
                 android:textSize="30dp"
                 android:layout_weight="0.26" />
 
-            <TextView
-
-
-                android:id = "@+id/PitchPipe"
+            <Button
+                android:id="@+id/pitchPipeButton"
                 android:text="Pitch Pipe"
                 android:layout_width="match_parent"
-                android:gravity="center"
                 android:layout_height="wrap_content" />
 
-            <Button
-                android:id="@+id/a"
-                android:text="a"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/aSharp"
-                android:text="a#"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/b"
-                android:text="b"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/c"
-                android:text="c"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/cSharp"
-                android:text="c#"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/d"
-                android:text="d"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/dSharp"
-                android:text="d#"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/e"
-                android:text="e"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/f"
-                android:text="f"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/fSharp"
-                android:text="f#"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/g"
-                android:text="g"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-            <Button
-                android:id="@+id/gSharp"
-                android:text="g#"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
 </ScrollView>

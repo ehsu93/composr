@@ -209,8 +209,9 @@ public class Drawer extends View {
     }
 
     public void test(){
-        String[] notesToDraw =  {"D5", "C5", "D4", "E5"};
+        String[] notesToDraw =  {"D5", "C5", "D4"};
         drawNotes(notesToDraw);
+        drawRest("quarter");
 
         drawBarLine();
     }
@@ -228,6 +229,16 @@ public class Drawer extends View {
                 notePaint);
 
         currentX += 150;
+    }
+
+    public void drawNote(String name, String duration){
+        Note note = notes.get(name);
+        drawNote(note);
+    }
+
+    public void drawRest(String duration) {
+        float y = -0.5f * 2 + 6.85f;
+        canvas.drawText(symbols.get("quarterRest"), currentX, y, notePaint);
     }
 
     public void drawBarLine(){
@@ -300,5 +311,6 @@ public class Drawer extends View {
     public void scrollLeft(int left){
         this.xoffset -= left;
     }
+
 
 }
