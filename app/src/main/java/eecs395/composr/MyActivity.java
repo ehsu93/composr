@@ -118,8 +118,10 @@ public class MyActivity extends Activity {
                 else {
                     listenButton.setText("Stop Listening");
                 }
+
+                dn.scrollLeft(50);
                 rt.toggleRecordingTask();
-                dn.toggleScrolling();
+                dn.invalidate();
             }
         });
 
@@ -263,6 +265,8 @@ public class MyActivity extends Activity {
                         //TextView text3 = (TextView) findViewById(R.id.frequencyArray);
                         //String newtext = rt.displayPattern;
                         //text3.setText(newtext);
+
+                        dn.scrollBy(-5, 0);
                     }
                 });
             }

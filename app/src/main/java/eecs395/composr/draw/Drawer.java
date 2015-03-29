@@ -141,6 +141,8 @@ public class Drawer extends View {
 
         // offset for ledger lines. Default is no ledger lines, hence offset = 0
         offset = 0;
+
+        this.scrolling = false;
     }
 
     /**
@@ -152,10 +154,7 @@ public class Drawer extends View {
     public void onDraw(Canvas canvas){
         this.canvas = canvas;
 
-        currentX = PADDING_LEFT - xoffset;
-        if (scrolling){
-            xoffset--;
-        }
+        currentX = PADDING_LEFT + xoffset;
 
         drawStaff();
 
@@ -296,6 +295,10 @@ public class Drawer extends View {
 
     public void toggleScrolling(){
         this.scrolling = true;
+    }
+
+    public void scrollLeft(int left){
+        this.xoffset -= left;
     }
 
 }

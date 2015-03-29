@@ -3,7 +3,13 @@ package eecs395.composr;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
+
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.util.Log;
+import android.widget.LinearLayout;
+
+import eecs395.composr.draw.Drawer;
 
 public class RecordingTask {
 
@@ -54,7 +60,6 @@ public class RecordingTask {
         this.previousNote = "R";
     }
 
-
     public void addFreq(Float freq){
         count++;
         rf.addFrequency(freq);
@@ -66,7 +71,6 @@ public class RecordingTask {
 
             @Override
             public void run() {
-
                 previousPosition = new SampleBeatPair(currentPosition);
                 incrementPosition();
 
@@ -260,7 +264,6 @@ public class RecordingTask {
     public void updateTimeSignature(int beatsPerMeasure, int beatDuration){
         this.beatsPerMeasure = beatsPerMeasure;
         this.beatDuration = beatDuration;
-
 
     }
 
