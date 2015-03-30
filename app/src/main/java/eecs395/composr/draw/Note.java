@@ -89,10 +89,22 @@ public class Note {
         }
     }
 
-    public String getSymbol(String clef){
+    public String getSymbol(String clef, String duration){
+
+        String durationSubstring;
 
         // first part of the string, the length of the note plus the word note
-        String durationSubstring = "quarterNote";
+        durationSubstring = "quarterNote";
+
+        if (duration == "i"){
+            durationSubstring = "eighthNote";
+        } else if (duration == "s"){
+            durationSubstring = "sixteenthNote";
+        } else if (duration == "h"){
+            durationSubstring = "halfNote";
+        } else if (duration == "w"){
+            durationSubstring = "wholeNote";
+        }
 
         // second part of the string, whether the stem is up or down
         String stemSubstring;
@@ -117,7 +129,7 @@ public class Note {
         if (this.getOctave() != other.getOctave()){
             return this.getOctave() > other.getOctave();
         }
-        
+
         // this is the order that notes occur in each octave, with C being the lowest note of each octave
         // must be Character because Arrays.asList does not work with primitives
         Character[] noteOrder = {'C', 'D', 'E', 'F', 'G', 'A', 'B'};
