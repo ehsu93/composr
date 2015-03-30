@@ -1,11 +1,14 @@
 package eecs395.composr;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
 import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.view.Display;
 import android.view.Menu;
@@ -24,6 +27,7 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import eecs395.proj.composr.R;
 
+import java.io.File;
 import java.io.IOException;
 
 public class MyActivity extends Activity {
@@ -76,24 +80,45 @@ public class MyActivity extends Activity {
         dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
         noteLayout.addView(dn);
 
-<<<<<<< HEAD:app/src/main/java/kenthacks/eric/composr/MyActivity.java
         rt = new RecordingTask(60, beatsPerMeasure, this);
-=======
         // initialize RecordingTask object, default
         rt = new RecordingTask(bpm, 4, this);
->>>>>>> origin/master:app/src/main/java/eecs395/composr/MyActivity.java
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
+
+        final Button openPdf = (Button) findViewById(R.id.pdfOpen);
+        openPdf.setOnClickListener(new View.onClickListener() {
+            TextView name = (TextView) findViewById(R.id.SheetMusicName);
+            String fileName = name.getText().toString() + ".pdf";
+            @Override
+            public void onClick(View v) {
+                File file = new File(fileName);
+                if (file.exists()) {
+                    Uri path = Uri.fromFile(file);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(path, "/Music/");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                    try {
+                        startActivity(intent);
+                    }
+                    catch (ActivityNotFoundException e) {
+                        Toast.makeText(MyActivity.this,
+                                "No Application Available to View PDF",
+                                Toast.LENGTH_SHORT).show();
+                    }
+            }
+
+        }
+        });
 
         final Button beats =  (Button) findViewById(R.id.beats);
         beats.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-<<<<<<< HEAD:app/src/main/java/kenthacks/eric/composr/MyActivity.java
                 switch(rt.getBeats()) {
                     case(4): beats.setText("2 beats"); rt.setBeats(2); break;
                     case(3): beats.setText("4 beats"); rt.setBeats(4); break;
                     case(2): beats.setText("3 beats"); rt.setBeats(3); break;
-=======
                 switch(beatsPerMeasure) {
                     case(4): beats.setText("2 beats");
                         beatsPerMeasure = 2;
@@ -104,7 +129,6 @@ public class MyActivity extends Activity {
                     case(2): beats.setText("3 beats");
                         beatsPerMeasure = 3;
                         break;
->>>>>>> origin/master:app/src/main/java/eecs395/composr/MyActivity.java
                     default: break;
                 }
                 dn.updateTimeSignature(beatsPerMeasure, beatDuration);
