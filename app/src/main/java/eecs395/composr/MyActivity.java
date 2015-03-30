@@ -86,7 +86,7 @@ public class MyActivity extends Activity {
         final PatternToMUSICXML pa = new PatternToMUSICXML(mContext);
 
         final Button openPdf = (Button) findViewById(R.id.pdfOpen);
-        openPdf.setOnClickListener(new View.onClickListener() {
+        openPdf.setOnClickListener(new View.OnClickListener() {
             TextView name = (TextView) findViewById(R.id.SheetMusicName);
             String fileName = name.getText().toString() + ".pdf";
             @Override
