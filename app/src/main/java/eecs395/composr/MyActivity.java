@@ -4,9 +4,11 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Display;
@@ -30,6 +32,7 @@ import be.tarsos.dsp.pitch.PitchProcessor;
 import eecs395.composr.draw.Drawer;
 import eecs395.proj.composr.R;
 
+import java.io.File;
 import java.io.IOException;
 
 public class MyActivity extends Activity {
@@ -55,7 +58,7 @@ public class MyActivity extends Activity {
     private static Context mContext;
 
     /** Default name of file */
-    String givenName = "";
+    String givenName = "myMusic";
 
     /** Default number of beats per measure */
     int beatsPerMeasure = 4;
@@ -108,11 +111,14 @@ public class MyActivity extends Activity {
         final Button musicButton = (Button) findViewById(R.id.makeMusic);
         final Button pitchPipeButton = (Button) findViewById(R.id.pitchPipeButton);
         final Button stopPitchPipe = (Button) dialog.findViewById(R.id.stop_pitchpipe);
+        final Button sendEmail = (Button) findViewById(R.id.sendEmail);
+
 
         // set button listeners
         beats.setOnClickListener(getBeatsListener(beats));
         listenButton.setOnClickListener(getListenListener(listenButton));
         musicButton.setOnClickListener(getMusicButtonListener(musicButton));
+        sendEmail.setOnClickListener(sendEmailListener(sendEmail));
 
         pitchPipeButton.setOnClickListener(new View.OnClickListener(){
             @Override
@@ -165,6 +171,26 @@ public class MyActivity extends Activity {
         dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
         noteLayout.addView(dn);
     }
+
+    public View.OnClickListener sendEmailListener(final Button sendEmail){
+        return new View.OnClickListener(){
+            public void onClick(View v){
+                Intent i = new Intent(Intent.ACTION_SEND);
+                i.setType("message/rfc822");
+                i.putExtra(Intent.EXTRA_SUBJECT, "MusicXML Generated with Composr");
+                i.putExtra(Intent.EXTRA_TEXT, "The MusicXML generated using Composr is attached");
+
+
+                updateGivenName();
+                File f = writeToFile();
+                Uri uri = Uri.fromFile(f);
+                i.putExtra(Intent.EXTRA_STREAM, uri);
+
+                startActivity(Intent.createChooser(i, "Send mail"));
+            }
+        };
+    }
+
 
     public static Context getContext(){
         return mContext;
@@ -224,15 +250,36 @@ public class MyActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
-                TextView name = (TextView) findViewById(R.id.musicName);
-                givenName = name.getText().toString();
-                try {
-                    pa.write(rt.pattern, givenName);
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                updateGivenName();
+                writeToFile();
             }
         };
+    }
+
+    /**
+     * Update the givenName field based on the content of the user input
+     * Does not change the name if the file is blank
+     */
+    public void updateGivenName(){
+        TextView nameTextView = (TextView) findViewById(R.id.musicName);
+        String name = nameTextView.getText().toString();
+        if (name.length() > 0) {
+            givenName = name;
+        }
+    }
+
+    /**
+     * Write the currently generated pattern to a MusicXML file
+     *
+     * @return The file object created
+     */
+    public File writeToFile(){
+        try {
+            return pa.write(rt.pattern, givenName);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public Dialog createPitchPipeDialog(){

@@ -75,6 +75,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
+            <Button
+                android:id="@+id/sendEmail"
+                android:text="Send as email attachment"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                />
+
             <TextView
                 android:id = "@+id/frequencyArray"
                 android:text="0"

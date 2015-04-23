@@ -19,40 +19,39 @@ public class PatternToMUSICXML {
     public PatternToMUSICXML() {
     }
 
-    public void write(String pat, String givenName) throws IOException {
-        if(givenName.length() < 1) {
-            givenName = "myMusic";
-        }
+    public File write(String pat, String givenName) throws IOException {
         try {
 
-           File sdCard = Environment.getExternalStorageDirectory();
-           FileOutputStream file = new FileOutputStream(sdCard.getAbsolutePath() +  PARENT_DIR +
-                   givenName + ".musicxml");
-           MusicXmlRenderer renderer = new MusicXmlRenderer();
-           MusicStringParser parser = new MusicStringParser();
-           parser.addParserListener(renderer);
+            File sdCard = Environment.getExternalStorageDirectory();
+            String fullFileName = sdCard.getAbsolutePath() + PARENT_DIR + givenName + ".musicxml";
+            FileOutputStream file = new FileOutputStream(fullFileName);
+            MusicXmlRenderer renderer = new MusicXmlRenderer();
+            MusicStringParser parser = new MusicStringParser();
+            parser.addParserListener(renderer);
 
-           Toast.makeText(MyActivity.getContext(), "Written to " +
-                   Environment.getExternalStorageDirectory() + PARENT_DIR + givenName + ".musicxml",
-                   Toast.LENGTH_LONG).show();
+            Toast.makeText(MyActivity.getContext(), "Written to " +
+                            Environment.getExternalStorageDirectory() + PARENT_DIR + givenName + ".musicxml",
+                    Toast.LENGTH_LONG).show();
 
-           Pattern pattern = new Pattern(pat);
+            Pattern pattern = new Pattern(pat);
 
-           parser.parse(pattern);
+            parser.parse(pattern);
 
-           Serializer serializer = new Serializer(file, "UTF-8");
-           serializer.setIndent(4);
-           serializer.write(renderer.getMusicXMLDoc());
+            Serializer serializer = new Serializer(file, "UTF-8");
+            serializer.setIndent(4);
+            serializer.write(renderer.getMusicXMLDoc());
 
-           file.flush();
-           file.close();
-       }
-       catch(UnsupportedEncodingException e) {
-           e.printStackTrace();
-       }
-       catch(IOException e) {
-           e.printStackTrace();
-       }
+            file.flush();
+            file.close();
+            return new File(fullFileName);
 
+        }
+        catch(UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+        catch(IOException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 }
