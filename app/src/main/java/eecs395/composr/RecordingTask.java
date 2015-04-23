@@ -3,19 +3,21 @@ package eecs395.composr;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-import android.util.Log;
 
-import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.util.Log;
+import android.widget.LinearLayout;
+
+import eecs395.composr.draw.Drawer;
 
 public class RecordingTask {
 
     // given as user inputs
     int bpm;
-    int beatsPerMeasure;
+    int beatsPerMeasure;    // top of time signature
+    int beatDuration;       // bottom of time signature
     int samplesPerBeat;
-
-    // sent in from MyActivity
-    Context ctx;
 
     // initial values
     boolean countdownComplete = false;
@@ -24,13 +26,14 @@ public class RecordingTask {
     SampleBeatPair previousPosition;
     SampleBeatPair currentPosition;
 
-    Float previousFreq;
+    String previousNote;
     int sameNoteStreak;
 
     // instances of other classes in the application
     Metronome metronome;
     FrequencyAnalyzer fr;
     RecordedFrequencies rf;
+    Drawer d;
 
     // created by toggle
     Timer timer;
@@ -42,28 +45,21 @@ public class RecordingTask {
     int end;
     int count;
 
-    public RecordingTask(int tempo, int beats, Context ctx){
+    public RecordingTask(int tempo, int beats, Drawer d){
         this.bpm = tempo;
         this.beatsPerMeasure = beats;
-        this.ctx = ctx;
+        this.d = d;
 
         // determines the accuracy of the application
         this.samplesPerBeat = 4;
 
-        this.metronome = new Metronome(ctx);
-        this.fr = new FrequencyAnalyzer(ctx);
+        this.metronome = new Metronome();
+        this.fr = new FrequencyAnalyzer();
         this.rf = new RecordedFrequencies();
 
         this.currentPosition = new SampleBeatPair(0, 0, 0);
         this.start = 0;
-        this.previousFreq = 0f;
-    }
-
-    public void setBeats(int beats) {
-        this.beats = beats;
-    }
-    public int getBeats(){
-        return this.beats;
+        this.previousNote = "R";
     }
 
     public void addFreq(Float freq){
@@ -77,7 +73,6 @@ public class RecordingTask {
 
             @Override
             public void run() {
-
                 previousPosition = new SampleBeatPair(currentPosition);
                 incrementPosition();
 
@@ -91,17 +86,22 @@ public class RecordingTask {
                     
                     String note = fr.getNoteFromFreq(median);
 
-                    if (median == previousFreq){
+                    if (note.equals(previousNote)){
+                        Log.i("recording-task", "same note...");
                         sameNoteStreak++;
                     } else {
+                        Log.i("recording-task",
+                                "\n\tend of note: " + note +
+                                "\n\tprevious note: " +
+                                "\n\tsamples: " + Integer.toString(sameNoteStreak));
                         updatePattern(note, sameNoteStreak);
-                        updateDisplayPattern(note);
+                        updateDisplay(note, sameNoteStreak);
 
                         // reset same note streak
                         sameNoteStreak = 0;
 
                         // update previousFreq
-                        previousFreq = median;
+                        previousNote = note;
                     }
                     start = end;
                 }
@@ -150,30 +150,65 @@ public class RecordingTask {
     public void updatePattern(String note, int duration){
         String durationString = getDurationString(duration);
         pattern += note + durationString + " ";
+        Log.i("current-pattern:", pattern);
     }
 
+    /**
+     * Update the pattern with a character but no duration (for barlines)
+     * @param note the character to update the pattern with
+     */
     public void updatePattern(String note){
         updatePattern(note, 0);
     }
 
     public String getDurationString(int duration){
 
-        if (duration != 0){
-            int samplePortionOfMeasure = samplesPerBeat / beatsPerMeasure;
-            int x = duration * samplePortionOfMeasure / beatsPerMeasure;
-            return Integer.toString(x);
+        // TODO: do this better
+        switch(duration){
+            case 1:
+                return "s";
+            case 2:
+                return "i";
+            case 3:
+                return "i.";
+            case 4:
+                return "q";
+            case 5:
+                return "qs"; // TODO find out what 5 samples should be
+            case 6:
+                return "q.";
+            case 7:
+                return "q.s"; // TODO ... 7 samples
+            case 8:
+                return "h";
+            case 9:
+                return "hs"; // TODO ... 9 samples
+            case 10:
+                return "hi"; // TODO... 10 samples
+            case 11:
+                return "hi."; // TODO... 11
+            case 12:
+                return "h.";
+            case 13:
+                return "hqs"; // TODO... 13
+            case 14:
+                return "hq."; // TODO... 14
+            case 15:
+                return "hq.s"; // TODO... 15
+            case 16:
+                return "w";
         }
 
         return "";
 
     }
 
-    public void updateDisplayPattern(String note, String duration){
+    public void updateDisplay(String note, int duration){
         if (note == "R"){
             // TODO find a different way to represent different length rests
-            displayPattern += "- ";
+            d.drawRest(getDurationString(duration));
         } else {
-            displayPattern += note + duration + " ";
+            d.drawNote(note, getDurationString(duration));
         }
 
         if (displayPattern.length() > 20) {
@@ -182,7 +217,7 @@ public class RecordingTask {
     }
 
     public void updateDisplayPattern(String note){
-        updateDisplayPattern(note, "");
+        //updateDisplay(note, 1);
     }
 
     public void truncateDisplayPattern(){
@@ -226,6 +261,12 @@ public class RecordingTask {
             currentPosition.incrementMeasure();
             processEndOfMeasure();
         }
+    }
+
+    public void updateTimeSignature(int beatsPerMeasure, int beatDuration){
+        this.beatsPerMeasure = beatsPerMeasure;
+        this.beatDuration = beatDuration;
+
     }
 
 }
