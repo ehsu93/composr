@@ -27,11 +27,11 @@ public class Symbols {
             put("sixteenthNoteStemUp", "");
 
             // rests
-            put("wholeRest", "^");      // 16
-            put("halfRest", "O");       // 8
-            put("halfRestdot", "K");    // 12
-            put("quarterRest", "X");    // 4
-            put("quarterRestDot", "Q"); // 6
+            put("wholeRest", "W");      // 16
+            put("halfRest", "D");       // 8
+            put("halfRestdot", "H");    // 12
+            put("quarterRest", "Q");    // 4
+            put("quarterRestDot", "J"); // 6
             put("eighthRest", "L");     // 2
             put("eighthRestDot", "P");  // 3
             put("sixteenthRest", "Z");  // 1

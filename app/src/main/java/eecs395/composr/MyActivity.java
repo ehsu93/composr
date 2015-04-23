@@ -1,20 +1,33 @@
 package eecs395.composr;
 
 import android.app.Activity;
+<<<<<<< HEAD
 import android.content.ActivityNotFoundException;
 import android.content.Context;
+=======
+import android.app.AlertDialog;
+import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+<<<<<<< HEAD
 import android.media.MediaPlayer;
+=======
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -37,14 +50,20 @@ public class MyActivity extends Activity {
     /** RecordingTask instance */
     RecordingTask rt;
 
+    /** Layout where the music will be displayed while recording */
+    LinearLayout noteLayout;
+
     /** DrawNotes instance */
     DrawNotes dn;
+
+    /** AudioDispatcher object */
+    AudioDispatcher dispatcher;
 
     /** mContext */
     Context mContext = this;
 
     /** Default name of file */
-    String givenName = "";
+    String givenName = "myMusic";
 
     /** Default number of beats per measure */
     int beatsPerMeasure = 4;
@@ -53,16 +72,28 @@ public class MyActivity extends Activity {
     int beatDuration = 4;
 
     /** Store the bpm */
+<<<<<<< HEAD
     int bpm = 60;
+=======
+    int bpm = 120;
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353
 
     int HEIGHT;
     int WIDTH;
+
+    String previousPattern;
+    boolean listening;
+
+    boolean isCurrentPatternSaved = false;
+    File lastSavedFile;
+    boolean waitingOnFileName = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_my);
+<<<<<<< HEAD
         LinearLayout noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
 
         // get height and width of screen
@@ -79,6 +110,15 @@ public class MyActivity extends Activity {
         dn.draw(canvas);
         dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
         noteLayout.addView(dn);
+=======
+
+        noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
+
+        mContext = this;
+
+        initializeHeightAndWidth(); // get height and width of screen
+        initializeDrawer(); // Initialize drawer to draw anything necessary on the canvas
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353
 
         rt = new RecordingTask(60, beatsPerMeasure, this);
         // initialize RecordingTask object, default
@@ -111,6 +151,7 @@ public class MyActivity extends Activity {
         }
         });
 
+<<<<<<< HEAD
         final Button beats =  (Button) findViewById(R.id.beats);
         beats.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -216,12 +257,41 @@ public class MyActivity extends Activity {
             }
         });
         cNote.setOnClickListener(new View.OnClickListener() {
+=======
+        pipe = new PitchPipe();
+        dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
+
+        final Dialog dialog = createPitchPipeDialog();
+        createPitchPipeSpinner(dialog);
+
+        // create buttons
+        final Button beats =  (Button) findViewById(R.id.beats);
+        final Button listenButton = (Button) findViewById(R.id.Toggle);
+        final Button musicButton = (Button) findViewById(R.id.makeMusic);
+        final Button pitchPipeButton = (Button) findViewById(R.id.pitchPipeButton);
+        final Button stopPitchPipe = (Button) dialog.findViewById(R.id.stop_pitchpipe);
+        final Button sendEmail = (Button) findViewById(R.id.sendEmail);
+
+
+        // set button listeners
+        beats.setOnClickListener(getBeatsListener(beats));
+        listenButton.setOnClickListener(getListenListener(listenButton));
+        musicButton.setOnClickListener(getMusicButtonListener(musicButton));
+        sendEmail.setOnClickListener(sendEmailListener(sendEmail));
+
+        pitchPipeButton.setOnClickListener(new View.OnClickListener(){
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353
             @Override
             public void onClick(View v) {
                 pipe.togglePlayTest(C);
             }
         });
+<<<<<<< HEAD
         cSharpNote.setOnClickListener(new View.OnClickListener() {
+=======
+
+        stopPitchPipe.setOnClickListener(new View.OnClickListener(){
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353
             @Override
             public void onClick(View v) {
                 pipe.togglePlayTest(CSHARP);
@@ -270,6 +340,7 @@ public class MyActivity extends Activity {
             }
         });
 
+<<<<<<< HEAD
         //PITCH PIPE END
 
         dispatcher.addAudioProcessor(new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
@@ -295,6 +366,9 @@ public class MyActivity extends Activity {
                 });
             }
         }));
+=======
+        dispatcher.addAudioProcessor(getAudioProcessor());
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353
 
 
         new Thread(dispatcher, "Audio Dispatcher").start();
@@ -315,4 +389,264 @@ public class MyActivity extends Activity {
         int id = item.getItemId();
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
+<<<<<<< HEAD
 }
+=======
+
+    public void initializeHeightAndWidth(){
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        this.WIDTH = size.x;
+        this.HEIGHT = size.y;
+    }
+
+    public void initializeDrawer(){
+        dn = new Drawer(this);
+        Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        dn.draw(canvas);
+        dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
+        noteLayout.addView(dn);
+    }
+
+    public View.OnClickListener sendEmailListener(final Button sendEmail){
+        return new View.OnClickListener(){
+            public void onClick(View v){
+                if (!isCurrentPatternSaved) {
+                    waitingOnFileName = true;
+                    promptForFilename();
+                } else {
+                    sendEmail();
+                }
+            }
+        };
+    }
+
+    public void sendEmail(){
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_SUBJECT, "MusicXML Generated with Composr");
+        i.putExtra(Intent.EXTRA_TEXT, "The MusicXML generated using Composr is attached");
+
+        Uri uri = Uri.fromFile(lastSavedFile);
+        i.putExtra(Intent.EXTRA_STREAM, uri);
+
+        startActivity(Intent.createChooser(i, "Send mail"));
+    }
+
+    public static Context getContext(){
+        return mContext;
+    }
+
+    public View.OnClickListener getBeatsListener(final Button beats){
+
+        // create and return a new OnClickListener object
+        return new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                switch(beatsPerMeasure) {
+                    case(4): beats.setText("2 beats");
+                        beatsPerMeasure = 2;
+                        break;
+                    case(3): beats.setText("4 beats");
+                        beatsPerMeasure = 4;
+                        break;
+                    case(2): beats.setText("3 beats");
+                        beatsPerMeasure = 3;
+                        break;
+                    default:
+                        break;
+                }
+
+                rt.updateTimeSignature(beatsPerMeasure, beatDuration);
+                dn.updateTimeSignature(beatsPerMeasure, beatDuration);
+
+                dn.invalidate(); // redraws the canvas
+            }
+        };
+    }
+
+    public View.OnClickListener getListenListener(final Button listenButton){
+        return new View.OnClickListener() {
+            public void onClick(View v) {
+                String buttonText = listenButton.getText().toString();
+                if (buttonText.equals("Stop Listening")) {
+                    listenButton.setText("Listen");
+                    listening = false;
+                }
+                else {
+                    listenButton.setText("Stop Listening");
+                    listening = true;
+                }
+
+                isCurrentPatternSaved = false;
+                lastSavedFile = null;
+                previousPattern = "";
+                rt.toggleRecordingTask();
+                dn.invalidate();
+            }
+        };
+    }
+
+    public View.OnClickListener getMusicButtonListener(final Button musicButton){
+        return new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
+                promptForFilename();
+            }
+        };
+    }
+
+    /**
+     * Write the currently generated pattern to a MusicXML file
+     *
+     */
+    public void writeToFile(){
+
+        try {
+            File f = pa.write(rt.pattern, givenName);
+            if (f != null){
+                // inform the user where the file was written to
+                Toast.makeText(MyActivity.getContext(), "Written to " + f.getAbsolutePath(),
+                        Toast.LENGTH_LONG).show();
+
+                isCurrentPatternSaved = true;
+                lastSavedFile = f;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public Dialog createPitchPipeDialog(){
+        Dialog dialog = new Dialog(MyActivity.this);
+        dialog.setContentView(R.layout.pitchpipe);
+        dialog.setTitle(R.string.pitch_pipe);
+        dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            @Override
+            public void onDismiss(DialogInterface dialog) {
+                pipe.stop();
+            }
+        });
+        return dialog;
+    }
+
+    public void promptForFilename(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Export to MusicXML");
+
+        final EditText input = new EditText(this);
+        input.setHint("Enter file name");
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                givenName = input.getText().toString();
+                writeToFile();
+
+                if (waitingOnFileName){
+                    waitingOnFileName = false;
+                    sendEmail();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    /**
+     * Create the spinner to display the pitch pipe values
+     *
+     * @param dialog The dialog to add the spinner to
+     * @return A spinner object with all the notes
+     */
+    public void createPitchPipeSpinner(Dialog dialog){
+        // override onclick listener of positive button
+        // initialize spinner with adapter
+        Spinner spinner = (Spinner) dialog.findViewById(R.id.pitchpipe_spinner);
+
+        // Create an ArrayAdapter using the string array and a default spinner layout
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this,
+                R.array.pitch_pipe_values, android.R.layout.simple_spinner_item);
+
+        // Specify the layout to use when the list of choices appears
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+
+        // Apply the adapter to the spinner
+        spinner.setAdapter(adapter);
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+                pipe.play(pos);
+            }
+            public void onNothingSelected(AdapterView<?> parent) {
+            }
+        });
+    }
+
+    public PitchProcessor getAudioProcessor(){
+        return new PitchProcessor(PitchProcessor.PitchEstimationAlgorithm.FFT_YIN, 22050, 1024, new PitchDetectionHandler() {
+            @Override
+            public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
+                final float pitchInHz = pitchDetectionResult.getPitch();
+                final String note = rt.fr.getNoteFromFreq(pitchInHz);
+
+                rt.addFreq(pitchInHz);
+
+                runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        TextView text = (TextView) findViewById(R.id.Pitch);
+                        text.setText("" + pitchInHz);
+                        TextView text2 = (TextView) findViewById(R.id.Note);
+                        text2.setText("" + note);
+
+                        if (listening) {
+                            // check with current pattern in recording task
+                            if (!previousPattern.equals(rt.pattern)) {
+
+                                // update displayed pattern
+                                int i = previousPattern.length();
+                                boolean notDone = true;
+                                while (notDone) {
+                                    int space = rt.pattern.indexOf(" ", i);
+                                    int nextSpace = rt.pattern.indexOf(" ", space + 1);
+
+                                    if (nextSpace == -1) {
+                                        nextSpace = rt.pattern.length();
+                                        notDone = false;
+                                    }
+
+                                    String nextPiece = rt.pattern.substring(space + 1, nextSpace);
+                                    i = nextSpace;
+                                    Log.i("drawnotetest", "next note to draw = [" + nextPiece + "]");
+                                    dn.drawNote(nextPiece);
+                                }
+
+                                previousPattern = rt.pattern;
+
+                                //}
+
+                                // scroll
+                                // dn.scrollBy(150, 0);
+                            }
+                        }
+
+                    }
+                });
+            }
+        });
+    }
+}
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353

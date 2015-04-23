@@ -84,6 +84,7 @@
             android:id = "@+id/pdfOpen"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+<<<<<<< HEAD
             />
 
 
@@ -213,3 +214,69 @@
 
      </LinearLayout>
 </LinearLayout>
+=======
+            android:orientation="vertical">
+
+            <Button
+                android:text="4 beats"
+                android:id = "@+id/beats"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <EditText
+                android:id = "@+id/Tempo"
+                android:hint = "Tempo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id = "@+id/Pitch"
+                android:text="Pitch Frequency"
+                android:layout_width="match_parent"
+                android:gravity="center"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id ="@+id/Note"
+                android:text="Note name"
+                android:gravity="center"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id = "@+id/Toggle"
+                android:text="Listen"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/makeMusic"
+                android:text="Export to MusicXML"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id="@+id/sendEmail"
+                android:text="Send as email attachment"
+                android:layout_height="wrap_content"
+                android:layout_width="match_parent"
+                />
+
+            <TextView
+                android:id = "@+id/frequencyArray"
+                android:text="0"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="30dp"
+                android:layout_weight="0.26" />
+
+            <Button
+                android:id="@+id/pitchPipeButton"
+                android:text="Pitch Pipe"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+        </LinearLayout>
+    </LinearLayout>
+</ScrollView>
+>>>>>>> 47fd3f8f9a179c202b8387245dc544688832c353

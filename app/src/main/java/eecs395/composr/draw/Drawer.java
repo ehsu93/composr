@@ -119,7 +119,7 @@ public class Drawer extends View {
         // initialize note paint
         notePaint = new Paint();
         notePaint.setStyle(Paint.Style.FILL);
-        notePaint.setColor(Color.BLUE);
+        notePaint.setColor(Color.BLACK);
         notePaint.setTypeface(noteTypeFace);
         notePaint.setTextSize(5 * SPACE_BETWEEN_LINES);
 
@@ -209,23 +209,27 @@ public class Drawer extends View {
     }
 
     public void test(){
-        String[] notesToDraw =  {"D5", "C5", "D4"};
-        drawNotes(notesToDraw);
-        drawRest("quarter");
+        drawNote("F4");
+        drawNote("C5");
+        drawNote("D5");
+        drawNote("D4");
 
         drawBarLine();
+        drawRest("");
     }
 
+    /* This was used for testing
     public void drawNotes(String[] notesToDraw){
         for (String noteString : notesToDraw){
             Note note = notes.get(noteString);
             drawNote(note);
         }
-    }
+    }*/
 
-    public void drawNote(Note note){
+    public void drawNote(Note note, String duration){
+        String symbol = note.getSymbol(clef, duration);
 
-        canvas.drawText(note.getSymbol(clef), currentX, note.getPosition(clef, SPACE_BETWEEN_LINES) + offset,
+        canvas.drawText(symbol, currentX, note.getPosition(clef, SPACE_BETWEEN_LINES) + offset,
                 notePaint);
 
         currentX += 150;
@@ -233,12 +237,36 @@ public class Drawer extends View {
 
     public void drawNote(String name, String duration){
         Note note = notes.get(name);
-        drawNote(note);
+        drawNote(note, duration);
+    }
+
+    public void drawNote(String name){
+        String noteName;
+        String duration;
+        if (name.indexOf("#") != -1){
+            noteName = name.substring(0, 3);
+            duration = name.substring(3);
+        } else {
+            noteName = name.substring(0, 2);
+            duration = name.substring(2);
+        }
+
+        drawNote(noteName, duration);
+    }
+
+    public void draw(String toDraw){
+        if (toDraw.indexOf("R") != -1){
+            drawRest("");
+        } else {
+            drawNote(toDraw);
+        }
     }
 
     public void drawRest(String duration) {
-        float y = -0.5f * 2 + 6.85f;
+        float y = 150;
+        Log.i("restest", symbols.get("quarterRest"));
         canvas.drawText(symbols.get("quarterRest"), currentX, y, notePaint);
+        currentX += 150;
     }
 
     public void drawBarLine(){
