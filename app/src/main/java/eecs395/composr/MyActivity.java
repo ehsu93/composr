@@ -1,6 +1,7 @@
 package eecs395.composr;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -10,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -18,6 +20,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.Spinner;
 import android.widget.TextView;
@@ -75,6 +78,10 @@ public class MyActivity extends Activity {
 
     String previousPattern;
     boolean listening;
+
+    boolean isCurrentPatternSaved = false;
+    File lastSavedFile;
+    boolean waitingOnFileName = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,22 +182,27 @@ public class MyActivity extends Activity {
     public View.OnClickListener sendEmailListener(final Button sendEmail){
         return new View.OnClickListener(){
             public void onClick(View v){
-                Intent i = new Intent(Intent.ACTION_SEND);
-                i.setType("message/rfc822");
-                i.putExtra(Intent.EXTRA_SUBJECT, "MusicXML Generated with Composr");
-                i.putExtra(Intent.EXTRA_TEXT, "The MusicXML generated using Composr is attached");
-
-
-                updateGivenName();
-                File f = writeToFile();
-                Uri uri = Uri.fromFile(f);
-                i.putExtra(Intent.EXTRA_STREAM, uri);
-
-                startActivity(Intent.createChooser(i, "Send mail"));
+                if (!isCurrentPatternSaved) {
+                    waitingOnFileName = true;
+                    promptForFilename();
+                } else {
+                    sendEmail();
+                }
             }
         };
     }
 
+    public void sendEmail(){
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_SUBJECT, "MusicXML Generated with Composr");
+        i.putExtra(Intent.EXTRA_TEXT, "The MusicXML generated using Composr is attached");
+
+        Uri uri = Uri.fromFile(lastSavedFile);
+        i.putExtra(Intent.EXTRA_STREAM, uri);
+
+        startActivity(Intent.createChooser(i, "Send mail"));
+    }
 
     public static Context getContext(){
         return mContext;
@@ -238,6 +250,8 @@ public class MyActivity extends Activity {
                     listening = true;
                 }
 
+                isCurrentPatternSaved = false;
+                lastSavedFile = null;
                 previousPattern = "";
                 rt.toggleRecordingTask();
                 dn.invalidate();
@@ -250,36 +264,30 @@ public class MyActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
-                updateGivenName();
-                writeToFile();
+                promptForFilename();
             }
         };
     }
 
     /**
-     * Update the givenName field based on the content of the user input
-     * Does not change the name if the file is blank
-     */
-    public void updateGivenName(){
-        TextView nameTextView = (TextView) findViewById(R.id.musicName);
-        String name = nameTextView.getText().toString();
-        if (name.length() > 0) {
-            givenName = name;
-        }
-    }
-
-    /**
      * Write the currently generated pattern to a MusicXML file
      *
-     * @return The file object created
      */
-    public File writeToFile(){
+    public void writeToFile(){
+
         try {
-            return pa.write(rt.pattern, givenName);
+            File f = pa.write(rt.pattern, givenName);
+            if (f != null){
+                // inform the user where the file was written to
+                Toast.makeText(MyActivity.getContext(), "Written to " + f.getAbsolutePath(),
+                        Toast.LENGTH_LONG).show();
+
+                isCurrentPatternSaved = true;
+                lastSavedFile = f;
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return null;
     }
 
     public Dialog createPitchPipeDialog(){
@@ -293,6 +301,37 @@ public class MyActivity extends Activity {
             }
         });
         return dialog;
+    }
+
+    public void promptForFilename(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Export to MusicXML");
+
+        final EditText input = new EditText(this);
+        input.setHint("Enter file name");
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                givenName = input.getText().toString();
+                writeToFile();
+
+                if (waitingOnFileName){
+                    waitingOnFileName = false;
+                    sendEmail();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     /**

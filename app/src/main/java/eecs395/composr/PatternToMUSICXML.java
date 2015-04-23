@@ -1,7 +1,6 @@
 package eecs395.composr;
 
 import android.os.Environment;
-import android.widget.Toast;
 
 import org.jfugue.MusicStringParser;
 import org.jfugue.MusicXmlRenderer;
@@ -29,9 +28,7 @@ public class PatternToMUSICXML {
             MusicStringParser parser = new MusicStringParser();
             parser.addParserListener(renderer);
 
-            Toast.makeText(MyActivity.getContext(), "Written to " +
-                            Environment.getExternalStorageDirectory() + PARENT_DIR + givenName + ".musicxml",
-                    Toast.LENGTH_LONG).show();
+
 
             Pattern pattern = new Pattern(pat);
 
