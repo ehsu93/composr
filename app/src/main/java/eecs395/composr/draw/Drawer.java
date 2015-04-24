@@ -19,6 +19,8 @@ import java.util.Hashtable;
 import java.util.List;
 
 import eecs395.composr.MyActivity;
+import eecs395.composr.TimeSignature;
+import eecs395.composr.TimeSignatures;
 
 public class Drawer extends View {
 
@@ -218,14 +220,6 @@ public class Drawer extends View {
         drawRest("");
     }
 
-    /* This was used for testing
-    public void drawNotes(String[] notesToDraw){
-        for (String noteString : notesToDraw){
-            Note note = notes.get(noteString);
-            drawNote(note);
-        }
-    }*/
-
     public void drawNote(Note note, String duration){
         String symbol = note.getSymbol(clef, duration);
 
@@ -299,11 +293,17 @@ public class Drawer extends View {
      *
      * When using this method, there needs to be a canvas.invalidate() call to reset the canvas.
      *
-     * @param top The top number of the time signature
-     * @param bottom The bottom number of the time signature
+     * @param t The new time signature
      */
-    public void updateTimeSignature(int top, int bottom){
+    public void updateTimeSignature(TimeSignature t){
+        int top = t.getTop();
+        int bottom = t.getBottom();
+
         timeSignature = symbols.get(Integer.toString(top) + "/" + Integer.toString(bottom));
+    }
+
+    public void updateTimeSignature(int i){
+        updateTimeSignature(TimeSignatures.getTimeSignatureFromIndex(i));
     }
 
     /**

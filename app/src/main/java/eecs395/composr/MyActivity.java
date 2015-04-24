@@ -16,6 +16,7 @@ import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -46,7 +47,7 @@ public class MyActivity extends Activity {
     LinearLayout noteLayout;
 
     /** DrawNotes instance */
-    Drawer dn;
+    Drawer d;
 
     /** Pitch pipe instance */
     PitchPipe pipe;
@@ -104,6 +105,7 @@ public class MyActivity extends Activity {
 
         noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
 
+
         initializeHeightAndWidth(); // get height and width of screen
         initializeDrawer(); // Initialize drawer to draw anything necessary on the canvas
 
@@ -111,7 +113,7 @@ public class MyActivity extends Activity {
         // THE SECOND VALUE SHOULD STAY AT 4. THAT IS THE DEFAULT NUMBER OF BEATS IN A MEASURE.
         // IT CAN BE CHANGED WHEN THE NUMBER OF BEATS IS CHANGED, DO NOT CHANGE IT HERE WITHOUT
         // A GOOD REASON.
-        rt = new RecordingTask(bpm, 4, dn); // see comment before changing
+        rt = new RecordingTask(bpm, 4, d); // see comment before changing
 
         // initialize object that converts pattern to MusicXML
         pa = new PatternToMUSICXML();
@@ -119,26 +121,27 @@ public class MyActivity extends Activity {
         pipe = new PitchPipe();
         dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
-        final Dialog dialog = createPitchPipeDialog();
-        createPitchPipeSpinner(dialog);
+        final Dialog pitchPipeDialog = createPitchPipeDialog();
+        createPitchPipeSpinner(pitchPipeDialog);
+
+        final Dialog timeSignatureDialog = createTimeSignatureDialog();
 
         // create buttons. This is where all of the buttons go
-        final Button beatsButton = (Button) findViewById(R.id.beats);
         final Button tempoButton = (Button) findViewById(R.id.tempo);
         final Button listenButton = (Button) findViewById(R.id.Toggle);
         final Button generateMusicXMLButton = (Button) findViewById(R.id.makeMusic);
         final Button pitchPipeButton = (Button) findViewById(R.id.pitchPipeButton);
-        final Button stopPitchPipeButton = (Button) dialog.findViewById(R.id.stop_pitchpipe);
+        final Button stopPitchPipeButton = (Button) pitchPipeDialog.findViewById(R.id.stop_pitchpipe);
         final Button sendEmailButton = (Button) findViewById(R.id.sendEmail);
         final Button openPdfButton = (Button) findViewById(R.id.pdfOpen);
 
-        // set button listeners. This is where all of the listeners are added.
-        beatsButton.setOnClickListener(getBeatsListener(beatsButton));
+        // set listeners. This is where all of the listeners are added.
+        noteLayout.setOnTouchListener(getNoteLayoutListener(timeSignatureDialog));
         tempoButton.setOnClickListener(getTempoListener(tempoButton));
         listenButton.setOnClickListener(getListenListener(listenButton));
         generateMusicXMLButton.setOnClickListener(getMusicButtonListener());
         sendEmailButton.setOnClickListener(getSendEmailListener());
-        pitchPipeButton.setOnClickListener(getPitchPipeButtonListener(dialog));
+        pitchPipeButton.setOnClickListener(getPitchPipeButtonListener(pitchPipeDialog));
         stopPitchPipeButton.setOnClickListener(getStopPitchPipeButtonListener());
         openPdfButton.setOnClickListener(getOpenPdfListener());
 
@@ -167,31 +170,18 @@ public class MyActivity extends Activity {
         return mContext;
     }
 
-    public View.OnClickListener getBeatsListener(final Button beats){
+    public View.OnTouchListener getNoteLayoutListener(final Dialog dialog){
 
-        // create and return a new OnClickListener object
-        return new View.OnClickListener() {
+        return new View.OnTouchListener(){
+            public boolean onTouch(View v, MotionEvent e){
 
-            @Override
-            public void onClick(View v) {
-                switch(beatsPerMeasure) {
-                    case(4): beats.setText("2 beats");
-                        beatsPerMeasure = 2;
-                        break;
-                    case(3): beats.setText("4 beats");
-                        beatsPerMeasure = 4;
-                        break;
-                    case(2): beats.setText("3 beats");
-                        beatsPerMeasure = 3;
-                        break;
-                    default:
-                        break;
+                if (e.getAction() == MotionEvent.ACTION_DOWN) {
+                    float x = e.getX();
+                    if (x > 170 && x < 320) {
+                        dialog.show();
+                    }
                 }
-
-                rt.updateTimeSignature(beatsPerMeasure, beatDuration);
-                dn.updateTimeSignature(beatsPerMeasure, beatDuration);
-
-                dn.invalidate(); // redraws the canvas
+                return true;
             }
         };
     }
@@ -221,7 +211,7 @@ public class MyActivity extends Activity {
                 lastSavedFile = null;
                 previousPattern = "";
                 rt.toggleRecordingTask();
-                dn.invalidate();
+                d.invalidate();
             }
         };
     }
@@ -285,12 +275,12 @@ public class MyActivity extends Activity {
     }
 
     public void initializeDrawer(){
-        dn = new Drawer(this);
+        d = new Drawer(this);
         Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
-        dn.draw(canvas);
-        dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
-        noteLayout.addView(dn);
+        d.draw(canvas);
+        d.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
+        noteLayout.addView(d);
     }
 
     /**
@@ -371,6 +361,23 @@ public class MyActivity extends Activity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+    }
+
+    public Dialog createTimeSignatureDialog(){
+
+        AlertDialog.Builder b = new AlertDialog.Builder(mContext);
+        b.setTitle(R.string.time_signature)
+                .setSingleChoiceItems(R.array.time_signature_values, -1,
+                        new DialogInterface.OnClickListener(){
+                            public void onClick(DialogInterface dialog, int i){
+                                rt.updateTimeSignature(i);
+                                d.updateTimeSignature(i);
+                                d.invalidate(); // must be called to update display
+                                dialog.dismiss();
+                            }
+                        });
+
+        return b.create();
     }
 
     public void promptForExportFilename(){
@@ -483,7 +490,7 @@ public class MyActivity extends Activity {
                                     String nextPiece = rt.pattern.substring(space + 1, nextSpace);
                                     i = nextSpace;
                                     Log.i("drawnotetest", "next note to draw = [" + nextPiece + "]");
-                                    dn.drawNote(nextPiece);
+                                    d.drawNote(nextPiece);
                                 }
 
                                 previousPattern = rt.pattern;

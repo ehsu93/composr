@@ -259,10 +259,14 @@ public class RecordingTask {
         }
     }
 
-    public void updateTimeSignature(int beatsPerMeasure, int beatDuration){
-        this.beatsPerMeasure = beatsPerMeasure;
-        this.beatDuration = beatDuration;
+    public void updateTimeSignature(TimeSignature t){
+        this.beatsPerMeasure = t.getTop();
+        this.beatDuration = t.getBottom();
 
+    }
+
+    public void updateTimeSignature(int i){
+        updateTimeSignature(TimeSignatures.getTimeSignatureFromIndex(i));
     }
 
 }

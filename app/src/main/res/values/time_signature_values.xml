@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="time_signature_values">
+        <item>4/2</item>
+        <item>3/2</item>
+        <item>6/4</item>
+        <item>5/4</item>
+        <item>4/4</item>
+        <item>3/4</item>
+        <item>2/4</item>
+        <item>9/8</item>
+        <item>6/8</item>
+        <item>3/8</item>
+        <item>2/8</item>
+    </string-array>
+
+</resources>
