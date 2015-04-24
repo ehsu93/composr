@@ -7,7 +7,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.View;
 
 import com.opencsv.CSVReader;
@@ -123,7 +122,7 @@ public class Drawer extends View {
         clefPaint.setStyle(Paint.Style.FILL);
         clefPaint.setColor(Color.BLACK);
         clefPaint.setTypeface(noteTypeFace);
-        clefPaint.setTextSize(7.5f * SPACE_BETWEEN_LINES);
+        clefPaint.setTextSize(8.5f * SPACE_BETWEEN_LINES);
 
         // initialize note paint
         notePaint = new Paint();
@@ -151,7 +150,7 @@ public class Drawer extends View {
         clef = symbols.get("trebleClef");
 
         // set the default clef offset to appropriate treble value
-        clefYOffset = 5.65f * SPACE_BETWEEN_LINES;
+        clefYOffset = 275 + PADDING_TOP;
 
         // offset for ledger lines. Default is no ledger lines, hence offset = 0
         offset = 0;
@@ -187,7 +186,8 @@ public class Drawer extends View {
         createNoteObjects();
 
         // to test that drawing a note will work
-        test();
+        //test();
+        drawRest("");
     }
 
     public void createNoteObjects(){
@@ -271,8 +271,7 @@ public class Drawer extends View {
     }
 
     public void drawRest(String duration) {
-        float y = 150;
-        Log.i("restest", symbols.get("quarterRest"));
+        float y = 250;
         canvas.drawText(symbols.get("quarterRest"), currentX, y, notePaint);
         currentX += 150;
     }
@@ -333,25 +332,26 @@ public class Drawer extends View {
      * canvas.invalidate() must be called to update the display
      */
     public void changeClef(){
-        if (clef.equals("g")){
+        if (clef.equals(symbols.get("trebleClef"))){
             // decrease font size
-            clefPaint.setTextSize(4.5f * SPACE_BETWEEN_LINES);
+            clefPaint.setTextSize(4.8f * SPACE_BETWEEN_LINES);
 
             // move upwards
-            clefYOffset = 3.7f * SPACE_BETWEEN_LINES;
+            clefYOffset = 165 + PADDING_TOP;
 
             // change character
             clef = symbols.get("bassClef");
         } else {
             // increase font size
-            clefPaint.setTextSize(7.5f * SPACE_BETWEEN_LINES);
+            clefPaint.setTextSize(8.5f * SPACE_BETWEEN_LINES);
 
             // move downwards
-            clefYOffset = 5.65f * SPACE_BETWEEN_LINES;
+            clefYOffset = 275 + PADDING_TOP;
 
             // change character
             clef = symbols.get("trebleClef");
         }
+
     }
 
     public void drawKeySignature(){

@@ -138,6 +138,7 @@ public class MyActivity extends Activity {
         final Button tempoButton = (Button) settingsDialog.findViewById(R.id.tempo);
         final Button keyButton = (Button) settingsDialog.findViewById(R.id.changeKey);
         final Button timeButton = (Button) settingsDialog.findViewById(R.id.changeTime);
+        final Button clefButton = (Button) settingsDialog.findViewById(R.id.changeClef);
 
         // save/share dialog buttons
         final Button generateMusicXMLButton = (Button) shareDialog.findViewById(R.id.makeMusic);
@@ -162,6 +163,7 @@ public class MyActivity extends Activity {
         tempoButton.setOnClickListener(showDialogListener(tempoDialog));
         keyButton.setOnClickListener(showDialogListener(keySignatureDialog));
         timeButton.setOnClickListener(showDialogListener(timeSignatureDialog));
+        clefButton.setOnClickListener(getClefListener(settingsDialog));
 
         // buttons in the share dialog
         generateMusicXMLButton.setOnClickListener(getMusicButtonListener());
@@ -229,6 +231,7 @@ public class MyActivity extends Activity {
                     // the user touched the clef area
                     if (x < 170){
                         drawer.changeClef();
+                        drawer.invalidate();
                     }
 
                     // the user touched the key signature area
@@ -319,6 +322,16 @@ public class MyActivity extends Activity {
             public void onClick(View view) {
                 // prompts the user to input a name for the file to export
                 promptForExportFilename();
+            }
+        };
+    }
+
+    public View.OnClickListener getClefListener(final Dialog parentDialog){
+        return new View.OnClickListener(){
+            public void onClick(View view){
+                drawer.changeClef();
+                drawer.invalidate();
+                parentDialog.dismiss();
             }
         };
     }
