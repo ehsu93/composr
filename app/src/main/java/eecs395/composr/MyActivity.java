@@ -11,7 +11,6 @@ import android.graphics.Canvas;
 import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
-import android.os.Environment;
 import android.util.Log;
 import android.view.Display;
 import android.view.Menu;
@@ -77,21 +76,33 @@ public class MyActivity extends Activity {
     int WIDTH;
 
     String previousPattern;
+
+    /** Whether the program is currently listening to input */
     boolean listening;
 
+    /** Indicates whether the last pattern recorded has been saved to the device */
     boolean isCurrentPatternSaved = false;
+
+    /** Stores the last file that has been saved on the device */
     File lastSavedFile;
+
+    /** Indicates whether the file has been named yet or not */
     boolean waitingOnFileName = false;
 
     @Override
+    /**
+     * Everything that happens when the application is first started
+     */
     protected void onCreate(Bundle savedInstanceState) {
 
-        super.onCreate(savedInstanceState);
+        super.onCreate(savedInstanceState); // this must be the first line
 
-        setContentView(R.layout.activity_my);
+        setContentView(R.layout.activity_my); // defines the screen layout of the application
 
+        // initializes the area at the tpo of the screen where notes are displayed
         noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
 
+        // set mContext so that other parts of the application can access the context
         mContext = this;
 
         initializeHeightAndWidth(); // get height and width of screen
@@ -113,33 +124,22 @@ public class MyActivity extends Activity {
         createPitchPipeSpinner(dialog);
 
         // create buttons
-        final Button beats =  (Button) findViewById(R.id.beats);
+        final Button beatsButton = (Button) findViewById(R.id.beats);
+        final Button tempoButton = (Button) findViewById(R.id.tempo);
         final Button listenButton = (Button) findViewById(R.id.Toggle);
-        final Button musicButton = (Button) findViewById(R.id.makeMusic);
+        final Button generateMusicXMLButton = (Button) findViewById(R.id.makeMusic);
         final Button pitchPipeButton = (Button) findViewById(R.id.pitchPipeButton);
-        final Button stopPitchPipe = (Button) dialog.findViewById(R.id.stop_pitchpipe);
-        final Button sendEmail = (Button) findViewById(R.id.sendEmail);
-
+        final Button stopPitchPipeButton = (Button) dialog.findViewById(R.id.stop_pitchpipe);
+        final Button sendEmailButton = (Button) findViewById(R.id.sendEmail);
 
         // set button listeners
-        beats.setOnClickListener(getBeatsListener(beats));
+        beatsButton.setOnClickListener(getBeatsListener(beatsButton));
+        tempoButton.setOnClickListener(getTempoListener(tempoButton));
         listenButton.setOnClickListener(getListenListener(listenButton));
-        musicButton.setOnClickListener(getMusicButtonListener(musicButton));
-        sendEmail.setOnClickListener(sendEmailListener(sendEmail));
-
-        pitchPipeButton.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                dialog.show();
-            }
-        });
-
-        stopPitchPipe.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                pipe.stop();
-            }
-        });
+        generateMusicXMLButton.setOnClickListener(getMusicButtonListener());
+        sendEmailButton.setOnClickListener(getSendEmailListener());
+        pitchPipeButton.setOnClickListener(getPitchPipeButtonListener(dialog));
+        stopPitchPipeButton.setOnClickListener(getStopPitchPipeButtonListener());
 
         dispatcher.addAudioProcessor(getAudioProcessor());
 
@@ -160,48 +160,6 @@ public class MyActivity extends Activity {
         // the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
-    }
-
-    public void initializeHeightAndWidth(){
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        this.WIDTH = size.x;
-        this.HEIGHT = size.y;
-    }
-
-    public void initializeDrawer(){
-        dn = new Drawer(this);
-        Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(result);
-        dn.draw(canvas);
-        dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
-        noteLayout.addView(dn);
-    }
-
-    public View.OnClickListener sendEmailListener(final Button sendEmail){
-        return new View.OnClickListener(){
-            public void onClick(View v){
-                if (!isCurrentPatternSaved) {
-                    waitingOnFileName = true;
-                    promptForFilename();
-                } else {
-                    sendEmail();
-                }
-            }
-        };
-    }
-
-    public void sendEmail(){
-        Intent i = new Intent(Intent.ACTION_SEND);
-        i.setType("message/rfc822");
-        i.putExtra(Intent.EXTRA_SUBJECT, "MusicXML Generated with Composr");
-        i.putExtra(Intent.EXTRA_TEXT, "The MusicXML generated using Composr is attached");
-
-        Uri uri = Uri.fromFile(lastSavedFile);
-        i.putExtra(Intent.EXTRA_STREAM, uri);
-
-        startActivity(Intent.createChooser(i, "Send mail"));
     }
 
     public static Context getContext(){
@@ -237,6 +195,14 @@ public class MyActivity extends Activity {
         };
     }
 
+    public View.OnClickListener getTempoListener(final Button tempo){
+        return new View.OnClickListener(){
+            public void onClick(View v){
+                //TODO
+            }
+        };
+    }
+
     public View.OnClickListener getListenListener(final Button listenButton){
         return new View.OnClickListener() {
             public void onClick(View v) {
@@ -259,7 +225,7 @@ public class MyActivity extends Activity {
         };
     }
 
-    public View.OnClickListener getMusicButtonListener(final Button musicButton){
+    public View.OnClickListener getMusicButtonListener(){
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -267,6 +233,54 @@ public class MyActivity extends Activity {
                 promptForFilename();
             }
         };
+    }
+
+    public View.OnClickListener getSendEmailListener(){
+        return new View.OnClickListener(){
+            public void onClick(View v){
+                if (!isCurrentPatternSaved) {
+                    waitingOnFileName = true;
+                    promptForFilename();
+                } else {
+                    sendEmail();
+                }
+            }
+        };
+    }
+
+    public View.OnClickListener getPitchPipeButtonListener(final Dialog pitchPipeDialog){
+        return new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                pitchPipeDialog.show();
+            }
+        };
+    }
+
+    public View.OnClickListener getStopPitchPipeButtonListener(){
+        return new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                pipe.stop();
+            }
+        };
+    }
+
+    public void initializeHeightAndWidth(){
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        this.WIDTH = size.x;
+        this.HEIGHT = size.y;
+    }
+
+    public void initializeDrawer(){
+        dn = new Drawer(this);
+        Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        dn.draw(canvas);
+        dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
+        noteLayout.addView(dn);
     }
 
     /**
@@ -290,6 +304,22 @@ public class MyActivity extends Activity {
         }
     }
 
+    public void sendEmail(){
+        Intent i = new Intent(Intent.ACTION_SEND);
+        i.setType("message/rfc822");
+        i.putExtra(Intent.EXTRA_SUBJECT, "MusicXML Generated with Composr");
+        i.putExtra(Intent.EXTRA_TEXT, "The MusicXML generated using Composr is attached");
+
+        Uri uri = Uri.fromFile(lastSavedFile);
+        i.putExtra(Intent.EXTRA_STREAM, uri);
+
+        startActivity(Intent.createChooser(i, "Send mail"));
+    }
+
+    /**
+     * Creates the pitch pipe dialog
+     * @return The pitch pipe dialog
+     */
     public Dialog createPitchPipeDialog(){
         Dialog dialog = new Dialog(MyActivity.this);
         dialog.setContentView(R.layout.pitchpipe);
@@ -301,37 +331,6 @@ public class MyActivity extends Activity {
             }
         });
         return dialog;
-    }
-
-    public void promptForFilename(){
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("Export to MusicXML");
-
-        final EditText input = new EditText(this);
-        input.setHint("Enter file name");
-        builder.setView(input);
-
-        // Set up the buttons
-        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                givenName = input.getText().toString();
-                writeToFile();
-
-                if (waitingOnFileName){
-                    waitingOnFileName = false;
-                    sendEmail();
-                }
-            }
-        });
-        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-
-        builder.show();
     }
 
     /**
@@ -362,6 +361,39 @@ public class MyActivity extends Activity {
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
+    }
+
+    public void promptForFilename(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Export to MusicXML");
+
+        final EditText input = new EditText(this);
+        input.setHint("Enter file name");
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                givenName = input.getText().toString();
+                writeToFile();
+
+                if (waitingOnFileName){
+                    waitingOnFileName = false;
+                    dialog.cancel();
+                    Toast.makeText(mContext, "Preparing file to send...", Toast.LENGTH_LONG);
+                    sendEmail();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
     }
 
     public PitchProcessor getAudioProcessor(){

@@ -37,9 +37,9 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <EditText
-                android:id = "@+id/Tempo"
-                android:hint = "Tempo"
+            <Button
+                android:text="120 bpm"
+                android:id="@+id/tempo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
