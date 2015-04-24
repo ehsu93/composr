@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string-array name="key_signatures">
+        <item>C Major/A Minor</item>
+        <item>G Major/E Minor</item>
+        <item>D Major/B Minor</item>
+        <item>A Major/F\u266f Minor</item>
+        <item>E Major/C\u266f Minor</item>
+        <item>B Major/G\u266f Minor</item>
+        <item>F\u266f Major/D\u266f Minor</item>
+        <item>C\u266f Major/A\u266f Minor</item>
+        <item>F Major/D Minor</item>
+        <item>B\u266d Major/G Minor</item>
+        <item>E\u266d Major/C Minor</item>
+        <item>A\u266d Major/F Minor</item>
+        <item>D\u266d Major/B\u266d Minor</item>
+        <item>G\u266d Major/E\u266d Minor</item>
+        <item>C\u266d Major/A\u266d Minor</item>
+    </string-array>
+
+</resources>

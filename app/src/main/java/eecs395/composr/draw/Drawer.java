@@ -19,8 +19,9 @@ import java.util.Hashtable;
 import java.util.List;
 
 import eecs395.composr.MyActivity;
-import eecs395.composr.TimeSignature;
-import eecs395.composr.TimeSignatures;
+import eecs395.composr.musicUtils.KeySignature;
+import eecs395.composr.musicUtils.TimeSignature;
+import eecs395.composr.musicUtils.TimeSignatures;
 
 public class Drawer extends View {
 
@@ -35,6 +36,8 @@ public class Drawer extends View {
 
     /** Paint object for the notes */
     Paint notePaint;
+
+    Paint testPaint;
 
     /** Stores all of the Note objects */
     Hashtable<String, Note> notes;
@@ -62,6 +65,8 @@ public class Drawer extends View {
 
     /** The one-letter string that represents the current time signature */
     String timeSignature;
+
+    KeySignature keySignature = KeySignature.C_MAJOR;
 
     /** The one-letter string that represents the current clef */
     String clef;
@@ -102,7 +107,7 @@ public class Drawer extends View {
         ((Activity)ctx).getWindowManager().getDefaultDisplay().getMetrics(dm);
         WIDTH = dm.widthPixels;
 
-        // initiatilize staff paint
+        // initialize staff paint
         staffPaint = new Paint();
         staffPaint.setStyle(Paint.Style.FILL);
         staffPaint.setColor(Color.BLACK);
@@ -132,13 +137,18 @@ public class Drawer extends View {
         timePaint.setTypeface(noteTypeFace);
         timePaint.setTextSize(5.75f * SPACE_BETWEEN_LINES);
 
+        testPaint = new Paint();
+        testPaint.setStyle(Paint.Style.FILL);
+        testPaint.setColor(Color.BLUE);
+        testPaint.setTextSize(200);
+
         // set default time signature to 4/4 time
         timeSignature = symbols.get("4/4");
 
         // set the default clef to treble
         clef = symbols.get("trebleClef");
 
-        // set the default clef offset to approriate treble value
+        // set the default clef offset to appropriate treble value
         clefYOffset = 5.65f * SPACE_BETWEEN_LINES;
 
         // offset for ledger lines. Default is no ledger lines, hence offset = 0
@@ -163,6 +173,12 @@ public class Drawer extends View {
         // draw the clef on the canvas
         canvas.drawText(clef, currentX, clefYOffset + offset, clefPaint);
         currentX += 150;
+
+
+        if (!keySignature.equals(KeySignature.C_MAJOR)){
+            updateKeySignature(keySignature);
+        }
+        //currentX += 120;
 
         // draw the time signature on the canvas
         canvas.drawText(timeSignature, currentX,
@@ -306,6 +322,15 @@ public class Drawer extends View {
         updateTimeSignature(TimeSignatures.getTimeSignatureFromIndex(i));
     }
 
+    public void updateKeySignature(int i){
+        updateKeySignature(KeySignature.getKeySignatureFromIndex(i));
+    }
+
+    public void updateKeySignature(KeySignature k){
+        //TODO: Draw key signature
+        canvas.drawText(k.toString(), 150f, 150f, testPaint);
+    }
+
     /**
      * Switch the clef displayed from treble to bass or vice versa. After using this method,
      * canvas.invalidate() must be called to update the display
@@ -330,6 +355,10 @@ public class Drawer extends View {
             // change character
             clef = symbols.get("trebleClef");
         }
+    }
+
+    public void drawKeySignature(KeySignature keySignature){
+
     }
 
     public void toggleScrolling(){

@@ -1,6 +1,6 @@
-package eecs395.composr;
+package eecs395.composr.musicUtils;
 
-import eecs395.composr.TimeSignature;
+import eecs395.composr.musicUtils.TimeSignature;
 
 public class TimeSignatures {
 

@@ -43,7 +43,7 @@ public class PitchPipe {
     }
 
     /**
-     * Stops the note that is currently being played by the pitch pipe
+     * Stops the note that is currently being played by the pitch pitchPipe
      */
     public void stop(){
         if (this.currentPlayer != null) {

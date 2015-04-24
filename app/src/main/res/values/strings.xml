@@ -9,5 +9,6 @@
     <string name="stop">Stop</string>
     <string name="pitch_pipe">Pitch Pipe</string>
     <string name="time_signature">Time Signature</string>
+    <string name="key_signature">Key Signature</string>
 
 </resources>

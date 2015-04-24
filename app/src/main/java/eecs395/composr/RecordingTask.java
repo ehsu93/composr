@@ -6,14 +6,16 @@ import java.util.TimerTask;
 import android.util.Log;
 
 import eecs395.composr.draw.Drawer;
+import eecs395.composr.musicUtils.TimeSignature;
+import eecs395.composr.musicUtils.TimeSignatures;
 
 public class RecordingTask {
 
     // given as user inputs
     int bpm;
-    int beatsPerMeasure;    // top of time signature
-    int beatDuration;       // bottom of time signature
+    TimeSignature timeSignature;
     int samplesPerBeat;
+
 
     // initial values
     boolean countdownComplete = false;
@@ -41,9 +43,9 @@ public class RecordingTask {
     int end;
     int count;
 
-    public RecordingTask(int tempo, int beats, Drawer d){
+    public RecordingTask(int tempo, TimeSignature timeSignature, Drawer d){
         this.bpm = tempo;
-        this.beatsPerMeasure = beats;
+        this.timeSignature = timeSignature;
         this.d = d;
 
         // determines the accuracy of the application
@@ -103,7 +105,7 @@ public class RecordingTask {
                 }
 
                 else if (currentPosition.isNewBeat()){
-                    int countDown = beatsPerMeasure - currentPosition.getBeat();
+                    int countDown = timeSignature.getTop() - currentPosition.getBeat();
                     displayPattern = ""+ countDown;
 
                     if(currentPosition.isNewMeasure()) {
@@ -240,7 +242,7 @@ public class RecordingTask {
 
     public void fillCurrentMeasureWithRests(){
         //TODO handle parts of a beat
-        while(currentPosition.getBeat() < beatsPerMeasure) {
+        while(currentPosition.getBeat() < timeSignature.getTop()) {
             pattern += "R ";
             currentPosition.incrementBeat();
         }
@@ -253,20 +255,18 @@ public class RecordingTask {
             currentPosition.incrementBeat();
         }
 
-        if (currentPosition.getBeat() == beatsPerMeasure){
+        if (currentPosition.getBeat() == timeSignature.getTop()){
             currentPosition.incrementMeasure();
             processEndOfMeasure();
         }
     }
 
-    public void updateTimeSignature(TimeSignature t){
-        this.beatsPerMeasure = t.getTop();
-        this.beatDuration = t.getBottom();
-
+    public void setTimeSignature(TimeSignature timeSignature){
+        this.timeSignature = timeSignature;
     }
 
     public void updateTimeSignature(int i){
-        updateTimeSignature(TimeSignatures.getTimeSignatureFromIndex(i));
+        setTimeSignature(TimeSignatures.getTimeSignatureFromIndex(i));
     }
 
 }

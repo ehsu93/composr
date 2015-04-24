@@ -47,7 +47,13 @@
 
             <Button
                 android:id = "@+id/tempo"
-                android:hint = "Tempo"
+                android:text = "Tempo"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" />
+
+            <Button
+                android:id = "@+id/changeKey"
+                android:text = "Change Key"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 

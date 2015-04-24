@@ -34,6 +34,7 @@ import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 import eecs395.composr.draw.Drawer;
+import eecs395.composr.musicUtils.TimeSignature;
 
 import java.io.File;
 import java.io.IOException;
@@ -41,61 +42,60 @@ import java.io.IOException;
 public class MyActivity extends Activity {
 
     /** RecordingTask instance */
-    RecordingTask rt;
+    private RecordingTask rt;
 
     /** Layout where the music will be displayed while recording */
-    LinearLayout noteLayout;
+    private LinearLayout noteLayout;
 
     /** DrawNotes instance */
-    Drawer d;
+    private Drawer drawer;
 
-    /** Pitch pipe instance */
-    PitchPipe pipe;
+    /** PitchPipe instance */
+    private PitchPipe pitchPipe;
 
     /** Pattern object */
-    PatternToMUSICXML pa;
+    private PatternToMUSICXML pa;
 
     /** AudioDispatcher object */
-    AudioDispatcher dispatcher;
+    private AudioDispatcher dispatcher;
 
     /** mContext */
     private static Context mContext;
 
     /** Default name of file */
-    String givenName = "myMusic";
+    private String givenName = "myMusic";
 
     /** Default number of beats per measure */
-    int beatsPerMeasure = 4;
-
-    /** Default value of beat duration */
-    int beatDuration = 4;
+    private TimeSignature timeSignature = new TimeSignature(4, 4);
 
     /** Store the bpm */
-    int bpm = 120;
+    private int bpm = 120;
 
-    int HEIGHT;
-    int WIDTH;
+    private int HEIGHT;
+    private int WIDTH;
 
-    String previousPattern;
+    private String previousPattern;
 
     /** Whether the program is currently listening to input */
-    boolean listening;
+    private boolean listening;
 
-    /** Indicates whether the last pattern recorded has been saved to the device */
-    boolean isCurrentPatternSaved = false;
+    /** Indicates whether the last pattern recorded has been saved to the device
+     *  Default value is false because nothing has been recorded yet */
+    private boolean isCurrentPatternSaved = false;
 
-    /** Stores the last file that has been saved on the device */
-    File lastSavedFile;
+    /** Indicates whether the file has been named yet or not
+     *  Necessary because there needs to be a file name for the email functionality
+     *  Default value is false because there is no pattern to write to a file yet */
+    private boolean toSendEmail = false;
 
-    /** Indicates whether the file has been named yet or not */
-    boolean waitingOnFileName = false;
+    /** Stores the last file that has been saved on the device for emailing purposes */
+    private File lastSavedFile;
 
-    @Override
     /**
      * Everything that happens when the application is first started
      */
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
-
         super.onCreate(savedInstanceState); // this must be the first line
 
         // set mContext so that other parts of the application can access the context
@@ -105,39 +105,39 @@ public class MyActivity extends Activity {
 
         noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
 
-
         initializeHeightAndWidth(); // get height and width of screen
         initializeDrawer(); // Initialize drawer to draw anything necessary on the canvas
 
-        // initialize RecordingTask object, default values
-        // THE SECOND VALUE SHOULD STAY AT 4. THAT IS THE DEFAULT NUMBER OF BEATS IN A MEASURE.
-        // IT CAN BE CHANGED WHEN THE NUMBER OF BEATS IS CHANGED, DO NOT CHANGE IT HERE WITHOUT
-        // A GOOD REASON.
-        rt = new RecordingTask(bpm, 4, d); // see comment before changing
+        // initialize RecordingTask object with default values
+        rt = new RecordingTask(bpm, timeSignature, drawer);
 
         // initialize object that converts pattern to MusicXML
         pa = new PatternToMUSICXML();
 
-        pipe = new PitchPipe();
-        dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
+        // initialize pitchPipe
+        pitchPipe = new PitchPipe();
 
+        // create dialogs
         final Dialog pitchPipeDialog = createPitchPipeDialog();
-        createPitchPipeSpinner(pitchPipeDialog);
-
         final Dialog timeSignatureDialog = createTimeSignatureDialog();
+        final Dialog keySignatureDialog = createKeySignatureDialog();
 
         // create buttons. This is where all of the buttons go
         final Button tempoButton = (Button) findViewById(R.id.tempo);
+        final Button keyButton = (Button) findViewById(R.id.changeKey);
         final Button listenButton = (Button) findViewById(R.id.Toggle);
         final Button generateMusicXMLButton = (Button) findViewById(R.id.makeMusic);
         final Button pitchPipeButton = (Button) findViewById(R.id.pitchPipeButton);
-        final Button stopPitchPipeButton = (Button) pitchPipeDialog.findViewById(R.id.stop_pitchpipe);
+        final Button stopPitchPipeButton =
+                (Button) pitchPipeDialog.findViewById(R.id.stop_pitchpipe);
         final Button sendEmailButton = (Button) findViewById(R.id.sendEmail);
         final Button openPdfButton = (Button) findViewById(R.id.pdfOpen);
 
         // set listeners. This is where all of the listeners are added.
         noteLayout.setOnTouchListener(getNoteLayoutListener(timeSignatureDialog));
-        tempoButton.setOnClickListener(getTempoListener(tempoButton));
+
+        tempoButton.setOnClickListener(getTempoListener());
+        keyButton.setOnClickListener(getKeyListener(keySignatureDialog));
         listenButton.setOnClickListener(getListenListener(listenButton));
         generateMusicXMLButton.setOnClickListener(getMusicButtonListener());
         sendEmailButton.setOnClickListener(getSendEmailListener());
@@ -145,12 +145,19 @@ public class MyActivity extends Activity {
         stopPitchPipeButton.setOnClickListener(getStopPitchPipeButtonListener());
         openPdfButton.setOnClickListener(getOpenPdfListener());
 
+        keyButton.setEnabled(true);
+
+        // initialize audio dispatcher
+        dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
         dispatcher.addAudioProcessor(getAudioProcessor());
-
         new Thread(dispatcher, "Audio Dispatcher").start();
-
     }
 
+    /**
+     * Needs to be overridden, not used in the application yet
+     * @param menu The application menu
+     * @return Returns true to display the menu
+     */
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
@@ -158,35 +165,76 @@ public class MyActivity extends Activity {
         return true;
     }
 
+    /**
+     * Must be overridden, not used in the application
+     * @param item The selected item from the menu
+     * @return Returns true to display the menu
+     */
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will automatically handle clicks on
-        // the Home/Up button, so long as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
 
+    /**
+     * Gives the context of the application so that it is accessible from outside the activity
+     * @return The application context
+     */
     public static Context getContext(){
         return mContext;
     }
 
-    public View.OnTouchListener getNoteLayoutListener(final Dialog dialog){
-
+    /**
+     * Returns the OnTouchListener for the note display area
+     * The OnTouchListener performs different actions based on the area that is touched
+     *
+     * @param timeSignatureDialog The dialog used to select the time signature
+     * @return The instance of OnTouchListener created for the NoteLayout
+     */
+    public View.OnTouchListener getNoteLayoutListener(final Dialog timeSignatureDialog){
         return new View.OnTouchListener(){
-            public boolean onTouch(View v, MotionEvent e){
 
+            @Override
+            public boolean onTouch(View v, MotionEvent e){
                 if (e.getAction() == MotionEvent.ACTION_DOWN) {
                     float x = e.getX();
-                    if (x > 170 && x < 320) {
-                        dialog.show();
+
+                    // the user touched the clef area
+                    if (x < 170){
+                        drawer.changeClef();
                     }
+
+                    // the user touched the key signature area
+                    if (x > 170 && x < 320) {
+                        timeSignatureDialog.show();
+                    }
+
                 }
                 return true;
             }
         };
     }
 
-    public View.OnClickListener getTempoListener(final Button tempo){
+    /**
+     * Returns an OnTouchListener that does nothing. This is used when the recording has started
+     * and the user is no longer able to change the time signature or clef
+     *
+     * @return An OnTouchListener that does nothing
+     */
+    public View.OnTouchListener getEmptyOnTouchListener(){
+        return new View.OnTouchListener(){
+            public boolean onTouch(View v, MotionEvent e){
+                return false;
+            }
+        };
+    }
+
+    /**
+     * Returns the OnClickListener for the tempo button
+     *
+     * @return The OnClickListener for the tempo button
+     */
+    public View.OnClickListener getTempoListener(){
         return new View.OnClickListener(){
             public void onClick(View v){
                 //TODO
@@ -194,44 +242,88 @@ public class MyActivity extends Activity {
         };
     }
 
+    public View.OnClickListener getKeyListener(final Dialog keySignatureDialog){
+        return new View.OnClickListener(){
+            public void onClick(View v){
+                keySignatureDialog.show();
+            }
+        };
+    }
+
+    /**
+     * Returns the OnClickListener for the Listen button
+     *
+     * @param listenButton Indicates whether to stop or start listening
+     * @return The OnClickListener for the Listen button
+     */
     public View.OnClickListener getListenListener(final Button listenButton){
         return new View.OnClickListener() {
             public void onClick(View v) {
+
+                // get the text from the button
                 String buttonText = listenButton.getText().toString();
+
+                // stop listening to the user
                 if (buttonText.equals("Stop Listening")) {
                     listenButton.setText("Listen");
                     listening = false;
                 }
+
+                // start listening to the user
                 else {
                     listenButton.setText("Stop Listening");
                     listening = true;
                 }
 
+                /* Whether the user just started or just stopped recording, the current pattern has
+                not yet been saved, set isCurrentPatternSaved to false*/
                 isCurrentPatternSaved = false;
+
+                // there is no last saved file at this time
                 lastSavedFile = null;
+
+                // reset previous pattern
                 previousPattern = "";
+
+                // start or stop the recording task
                 rt.toggleRecordingTask();
-                d.invalidate();
+
+                // invalidate the drawer object so that the display updates
+                drawer.invalidate();
             }
         };
     }
 
+    /**
+     * Returns the OnClickListener for the button that exports to MusicXML
+     *
+     * @return The OnClickListener for the button that exports to MusicXML
+     */
     public View.OnClickListener getMusicButtonListener(){
         return new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
+                // prompts the user to input a name for the file to export
                 promptForExportFilename();
             }
         };
     }
 
+    /**
+     * Returns the OnClickListener for the send email button which will prompt for a file name and
+     * save it if it hasn't already been done, otherwise it will go straight into the sendEmail
+     * method
+     *
+     * @return the OnClickListener for the send email button
+     */
     public View.OnClickListener getSendEmailListener(){
         return new View.OnClickListener(){
             public void onClick(View v){
+
+                // current pattern is not saved, prompt the user for a filename
                 if (!isCurrentPatternSaved) {
-                    waitingOnFileName = true;
-                    promptForExportFilename();
+                    toSendEmail = true;
+                    promptForExportFilename(); // this will call sendEmail() later
                 } else {
                     sendEmail();
                 }
@@ -239,6 +331,13 @@ public class MyActivity extends Activity {
         };
     }
 
+    /**
+     * Return the OnClickListener for the pitch pipe button. Requires the dialog as input so that
+     * it can show the dialog
+     *
+     * @param pitchPipeDialog The pitch pipe dialog
+     * @return The OnClickListener for the pitch pipe button
+     */
     public View.OnClickListener getPitchPipeButtonListener(final Dialog pitchPipeDialog){
         return new View.OnClickListener(){
             @Override
@@ -248,24 +347,41 @@ public class MyActivity extends Activity {
         };
     }
 
+    /**
+     * Return the OnClickListener for the stop button in the pitch pipe dialog. It turns the pitch
+     * pipe sound off.
+     *
+     * @return the OnClickListener for the stop button in the pitch pipe dialog
+     */
     public View.OnClickListener getStopPitchPipeButtonListener(){
         return new View.OnClickListener(){
             @Override
             public void onClick(View view){
-                pipe.stop();
+                pitchPipe.stop();
             }
         };
     }
 
+    /**
+     * Gets the OnClickListener for the OpenPDF button. Will prompt the user to select a filename to
+     * open.
+     *
+     * @return the OnClickListener for the OpenPDF button
+     */
     public View.OnClickListener getOpenPdfListener(){
         return new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 promptForOpenFilename();
             }
+            /*TODO: decide how to handle a user trying to view the PDF of the most recently created
+            file without having to go through this */
         };
     }
 
+    /**
+     * Set the HEIGHT and WIDTH attributes for the activity based on the phone size
+     */
     public void initializeHeightAndWidth(){
         Display display = getWindowManager().getDefaultDisplay();
         Point size = new Point();
@@ -274,13 +390,16 @@ public class MyActivity extends Activity {
         this.HEIGHT = size.y;
     }
 
+    /**
+     * Initliaze the Drawer object
+     */
     public void initializeDrawer(){
-        d = new Drawer(this);
+        drawer = new Drawer(this);
         Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
-        d.draw(canvas);
-        d.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
-        noteLayout.addView(d);
+        drawer.draw(canvas);
+        drawer.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
+        noteLayout.addView(drawer);
     }
 
     /**
@@ -304,6 +423,9 @@ public class MyActivity extends Activity {
         }
     }
 
+    /**
+     * Send the user an email with the file as an attachment (or whatever other app they use)
+     */
     public void sendEmail(){
         Intent i = new Intent(Intent.ACTION_SEND);
         i.setType("message/rfc822");
@@ -317,8 +439,8 @@ public class MyActivity extends Activity {
     }
 
     /**
-     * Creates the pitch pipe dialog
-     * @return The pitch pipe dialog
+     * Creates the pitch pitchPipe dialog
+     * @return The pitch pitchPipe dialog
      */
     public Dialog createPitchPipeDialog(){
         Dialog dialog = new Dialog(MyActivity.this);
@@ -327,14 +449,15 @@ public class MyActivity extends Activity {
         dialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
             @Override
             public void onDismiss(DialogInterface dialog) {
-                pipe.stop();
+                pitchPipe.stop();
             }
         });
+        createPitchPipeSpinner(dialog);
         return dialog;
     }
 
     /**
-     * Create the spinner to display the pitch pipe values
+     * Create the spinner to display the pitch pitchPipe values
      *
      * @param dialog The dialog to add the spinner to
      * @return A spinner object with all the notes
@@ -356,28 +479,58 @@ public class MyActivity extends Activity {
 
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
-                pipe.play(pos);
+                pitchPipe.play(pos);
             }
             public void onNothingSelected(AdapterView<?> parent) {
             }
         });
     }
 
-    public Dialog createTimeSignatureDialog(){
-
+    /**
+     * Creates a simple dialog that has a list of options, from which the user chooses one and then
+     * the dialog is dismissed
+     *
+     * @param title The string resource containing the title
+     * @param options The string-array resource containing the list of options
+     * @return The dialog with the list
+     */
+    public Dialog createListOptionDialog(int title, int options, DialogInterface.OnClickListener d){
         AlertDialog.Builder b = new AlertDialog.Builder(mContext);
-        b.setTitle(R.string.time_signature)
-                .setSingleChoiceItems(R.array.time_signature_values, -1,
-                        new DialogInterface.OnClickListener(){
-                            public void onClick(DialogInterface dialog, int i){
-                                rt.updateTimeSignature(i);
-                                d.updateTimeSignature(i);
-                                d.invalidate(); // must be called to update display
-                                dialog.dismiss();
-                            }
-                        });
+        b.setTitle(title)
+                .setSingleChoiceItems(options, -1, d);
 
         return b.create();
+    }
+
+    /**
+     * Creates the dialog for the time signature input
+     * @return The time signature dialog
+     */
+    public Dialog createTimeSignatureDialog(){
+        return createListOptionDialog(R.string.time_signature, R.array.time_signature_values,
+                new Dialog.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int i){
+                        rt.updateTimeSignature(i);
+                        drawer.updateTimeSignature(i);
+                        drawer.invalidate(); // must be called to update display
+                        dialog.dismiss();
+                    }
+                });
+    }
+
+    /**
+     * Creates the dialog for the key signature input
+     * @return The key signature dialog
+     */
+    public Dialog createKeySignatureDialog(){
+        return createListOptionDialog(R.string.key_signature, R.array.key_signatures,
+                new Dialog.OnClickListener(){
+                    public void onClick(DialogInterface dialog, int i){
+                        drawer.updateKeySignature(i);
+                        drawer.invalidate();
+                        dialog.dismiss();
+                    }
+                });
     }
 
     public void promptForExportFilename(){
@@ -395,8 +548,8 @@ public class MyActivity extends Activity {
                 givenName = input.getText().toString();
                 writeToFile();
 
-                if (waitingOnFileName){
-                    waitingOnFileName = false;
+                if (toSendEmail){
+                    toSendEmail = false;
                     dialog.cancel();
                     Toast.makeText(mContext, "Preparing file to send...", Toast.LENGTH_LONG);
                     sendEmail();
@@ -490,7 +643,7 @@ public class MyActivity extends Activity {
                                     String nextPiece = rt.pattern.substring(space + 1, nextSpace);
                                     i = nextSpace;
                                     Log.i("drawnotetest", "next note to draw = [" + nextPiece + "]");
-                                    d.drawNote(nextPiece);
+                                    drawer.drawNote(nextPiece);
                                 }
 
                                 previousPattern = rt.pattern;
