@@ -23,6 +23,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.NumberPicker;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -119,28 +120,54 @@ public class MyActivity extends Activity {
 
         // create dialogs
         final Dialog pitchPipeDialog = createPitchPipeDialog();
-        final Dialog timeSignatureDialog = createTimeSignatureDialog();
-        final Dialog keySignatureDialog = createKeySignatureDialog();
+        final Dialog settingsDialog = createParentDialog(R.layout.settings,
+                R.string.settings_title);
+        final Dialog toolsDialog = createParentDialog(R.layout.tools, R.string.tools_title);
+        final Dialog shareDialog = createParentDialog(R.layout.share, R.string.share_title);
+        final Dialog timeSignatureDialog = createTimeSignatureDialog(settingsDialog);
+        final Dialog keySignatureDialog = createKeySignatureDialog(settingsDialog);
+        final Dialog tempoDialog = createTempoDialog(settingsDialog);
 
-        // create buttons. This is where all of the buttons go
-        final Button tempoButton = (Button) findViewById(R.id.tempo);
-        final Button keyButton = (Button) findViewById(R.id.changeKey);
+        // buttons on the main screen
+        final Button settingsButton = (Button) findViewById(R.id.settings);
         final Button listenButton = (Button) findViewById(R.id.Toggle);
-        final Button generateMusicXMLButton = (Button) findViewById(R.id.makeMusic);
-        final Button pitchPipeButton = (Button) findViewById(R.id.pitchPipeButton);
+        final Button shareButton = (Button) findViewById(R.id.share_button);
+        final Button toolsButton = (Button) findViewById(R.id.tools_button);
+
+        // settings dialog buttons
+        final Button tempoButton = (Button) settingsDialog.findViewById(R.id.tempo);
+        final Button keyButton = (Button) settingsDialog.findViewById(R.id.changeKey);
+        final Button timeButton = (Button) settingsDialog.findViewById(R.id.changeTime);
+
+        // save/share dialog buttons
+        final Button generateMusicXMLButton = (Button) shareDialog.findViewById(R.id.makeMusic);
+        final Button sendEmailButton = (Button) shareDialog.findViewById(R.id.sendEmail);
+
+        // tools dialog buttons
+        final Button pitchPipeButton = (Button) toolsDialog.findViewById(R.id.pitchPipeButton);
         final Button stopPitchPipeButton =
                 (Button) pitchPipeDialog.findViewById(R.id.stop_pitchpipe);
-        final Button sendEmailButton = (Button) findViewById(R.id.sendEmail);
-        final Button openPdfButton = (Button) findViewById(R.id.pdfOpen);
+        final Button openPdfButton = (Button) toolsDialog.findViewById(R.id.pdfOpen);
 
         // set listeners. This is where all of the listeners are added.
         noteLayout.setOnTouchListener(getNoteLayoutListener(timeSignatureDialog));
 
-        tempoButton.setOnClickListener(getTempoListener());
-        keyButton.setOnClickListener(getKeyListener(keySignatureDialog));
+        // buttons on the main screen
+        settingsButton.setOnClickListener(showDialogListener(settingsDialog));
         listenButton.setOnClickListener(getListenListener(listenButton));
+        shareButton.setOnClickListener(showDialogListener(shareDialog));
+        toolsButton.setOnClickListener(showDialogListener(toolsDialog));
+
+        // buttons in the settings dialog
+        tempoButton.setOnClickListener(showDialogListener(tempoDialog));
+        keyButton.setOnClickListener(showDialogListener(keySignatureDialog));
+        timeButton.setOnClickListener(showDialogListener(timeSignatureDialog));
+
+        // buttons in the share dialog
         generateMusicXMLButton.setOnClickListener(getMusicButtonListener());
         sendEmailButton.setOnClickListener(getSendEmailListener());
+
+        // buttons in the tools dialog
         pitchPipeButton.setOnClickListener(getPitchPipeButtonListener(pitchPipeDialog));
         stopPitchPipeButton.setOnClickListener(getStopPitchPipeButtonListener());
         openPdfButton.setOnClickListener(getOpenPdfListener());
@@ -229,23 +256,10 @@ public class MyActivity extends Activity {
         };
     }
 
-    /**
-     * Returns the OnClickListener for the tempo button
-     *
-     * @return The OnClickListener for the tempo button
-     */
-    public View.OnClickListener getTempoListener(){
+    public View.OnClickListener showDialogListener(final Dialog dialog){
         return new View.OnClickListener(){
             public void onClick(View v){
-                //TODO
-            }
-        };
-    }
-
-    public View.OnClickListener getKeyListener(final Dialog keySignatureDialog){
-        return new View.OnClickListener(){
-            public void onClick(View v){
-                keySignatureDialog.show();
+                dialog.show();
             }
         };
     }
@@ -456,6 +470,13 @@ public class MyActivity extends Activity {
         return dialog;
     }
 
+    public Dialog createParentDialog(int layout, int title){
+        Dialog dialog = new Dialog(mContext);
+        dialog.setContentView(layout);
+        dialog.setTitle(title);
+        return dialog;
+    }
+
     /**
      * Create the spinner to display the pitch pitchPipe values
      *
@@ -496,9 +517,7 @@ public class MyActivity extends Activity {
      */
     public Dialog createListOptionDialog(int title, int options, DialogInterface.OnClickListener d){
         AlertDialog.Builder b = new AlertDialog.Builder(mContext);
-        b.setTitle(title)
-                .setSingleChoiceItems(options, -1, d);
-
+        b.setTitle(title).setSingleChoiceItems(options, -1, d);
         return b.create();
     }
 
@@ -506,7 +525,7 @@ public class MyActivity extends Activity {
      * Creates the dialog for the time signature input
      * @return The time signature dialog
      */
-    public Dialog createTimeSignatureDialog(){
+    public Dialog createTimeSignatureDialog(final Dialog parentDialog){
         return createListOptionDialog(R.string.time_signature, R.array.time_signature_values,
                 new Dialog.OnClickListener(){
                     public void onClick(DialogInterface dialog, int i){
@@ -514,6 +533,7 @@ public class MyActivity extends Activity {
                         drawer.updateTimeSignature(i);
                         drawer.invalidate(); // must be called to update display
                         dialog.dismiss();
+                        parentDialog.dismiss();
                     }
                 });
     }
@@ -522,15 +542,45 @@ public class MyActivity extends Activity {
      * Creates the dialog for the key signature input
      * @return The key signature dialog
      */
-    public Dialog createKeySignatureDialog(){
+    public Dialog createKeySignatureDialog(final Dialog parentDialog){
         return createListOptionDialog(R.string.key_signature, R.array.key_signatures,
                 new Dialog.OnClickListener(){
                     public void onClick(DialogInterface dialog, int i){
                         drawer.updateKeySignature(i);
                         drawer.invalidate();
                         dialog.dismiss();
+                        parentDialog.dismiss();
                     }
                 });
+    }
+
+    public Dialog createTempoDialog(final Dialog parentDialog){
+        AlertDialog.Builder b = new AlertDialog.Builder(mContext);
+        b.setTitle(R.string.tempo);
+        final NumberPicker input = new NumberPicker(mContext);
+        input.setMinValue(40);
+        input.setMaxValue(200);
+        input.setValue(120);
+        b.setView(input);
+
+        b.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                bpm = input.getValue();
+                rt.updateTempo(bpm);
+                dialog.dismiss();
+                parentDialog.dismiss();
+
+            }
+        });
+        b.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        return b.create();
     }
 
     public void promptForExportFilename(){

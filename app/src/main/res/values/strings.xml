@@ -10,5 +10,9 @@
     <string name="pitch_pipe">Pitch Pipe</string>
     <string name="time_signature">Time Signature</string>
     <string name="key_signature">Key Signature</string>
+    <string name="settings_title">Settings</string>
+    <string name="share_title">Save &amp; Share</string>
+    <string name="tools_title">Tools</string>
+    <string name="tempo">Tempo</string>
 
 </resources>

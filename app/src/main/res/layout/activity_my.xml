@@ -46,16 +46,10 @@
                 android:layout_height="wrap_content" />
 
             <Button
-                android:id = "@+id/tempo"
-                android:text = "Tempo"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:id = "@+id/changeKey"
-                android:text = "Change Key"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
+                android:layout_height="wrap_content"
+                android:id="@+id/settings"
+                android:text="Recording Settings"/>
 
             <Button
                 android:id = "@+id/Toggle"
@@ -63,37 +57,17 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <EditText
-                android:id = "@+id/musicName"
-                android:hint="Enter music name"
-                android:layout_width="match_parent"
+            <Button
+                android:id = "@+id/share_button"
+                android:text="Save &amp; Share"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
 
             <Button
-                android:id="@+id/makeMusic"
-                android:text="Export to MusicXML"
-                android:layout_width="match_parent"
+                android:id="@+id/tools_button"
+                android:text="Tools"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content" />
-
-            <Button
-                android:id="@+id/sendEmail"
-                android:text="Send as email attachment"
-                android:layout_height="wrap_content"
-                android:layout_width="match_parent"
-                />
-
-            <Button
-                android:id="@+id/pitchPipeButton"
-                android:text="Pitch Pipe"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:text="Open sheet music"
-                android:id = "@+id/pdfOpen"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                />
 
         </LinearLayout>
     </LinearLayout>

@@ -268,4 +268,8 @@ public class RecordingTask {
         setTimeSignature(TimeSignature.getTimeSignatureFromIndex(i));
     }
 
+    public void updateTempo(int i){
+        bpm = i;
+    }
+
 }
