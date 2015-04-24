@@ -66,7 +66,7 @@ public class MyActivity extends Activity {
     private String givenName = "myMusic";
 
     /** Default number of beats per measure */
-    private TimeSignature timeSignature = new TimeSignature(4, 4);
+    private TimeSignature timeSignature = TimeSignature.FOUR_FOUR;
 
     /** Store the bpm */
     private int bpm = 120;

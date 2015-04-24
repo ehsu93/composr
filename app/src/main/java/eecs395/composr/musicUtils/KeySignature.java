@@ -64,11 +64,11 @@ public enum KeySignature {
         this.containsSharps = complement.getContainsSharps();
     }
 
-    int getAccidentals(){
+    public int getAccidentals(){
         return this.accidentals;
     }
 
-    boolean getContainsSharps(){
+    public boolean getContainsSharps(){
         return this.containsSharps;
     }
 

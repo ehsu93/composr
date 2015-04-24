@@ -11,6 +11,9 @@ public class Symbols {
             put("trebleClef", "g");
             put("bassClef", "?");
 
+            put("flat", "b");
+            put("sharp", "B");
+
             // notes
             put("wholeNote", "");
 

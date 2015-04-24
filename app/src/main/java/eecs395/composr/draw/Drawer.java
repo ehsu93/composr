@@ -21,7 +21,6 @@ import java.util.List;
 import eecs395.composr.MyActivity;
 import eecs395.composr.musicUtils.KeySignature;
 import eecs395.composr.musicUtils.TimeSignature;
-import eecs395.composr.musicUtils.TimeSignatures;
 
 public class Drawer extends View {
 
@@ -46,7 +45,7 @@ public class Drawer extends View {
     Symbols symbols;
 
     /** Distance between top of canvas and everything drawn */
-    final int PADDING_TOP = 20;
+    final int PADDING_TOP = 50;
 
     /** Distance between bottom of canvas and everything drawn */
     //final int PADDING_BOTTOM = 20;
@@ -86,6 +85,9 @@ public class Drawer extends View {
     boolean scrolling;
 
     float xoffset = 0;
+
+    float[] sharpHeights = {50, 125, 25, 100, 175, 75, 150};
+    float[] flatHeights = {150, 75, 175, 100, 200, 125, 225};
 
     /**
      * Constructor to initialize all of the default values and Paint objects.
@@ -174,11 +176,7 @@ public class Drawer extends View {
         canvas.drawText(clef, currentX, clefYOffset + offset, clefPaint);
         currentX += 150;
 
-
-        if (!keySignature.equals(KeySignature.C_MAJOR)){
-            updateKeySignature(keySignature);
-        }
-        //currentX += 120;
+        drawKeySignature();
 
         // draw the time signature on the canvas
         canvas.drawText(timeSignature, currentX,
@@ -319,7 +317,7 @@ public class Drawer extends View {
     }
 
     public void updateTimeSignature(int i){
-        updateTimeSignature(TimeSignatures.getTimeSignatureFromIndex(i));
+        updateTimeSignature(TimeSignature.getTimeSignatureFromIndex(i));
     }
 
     public void updateKeySignature(int i){
@@ -327,8 +325,7 @@ public class Drawer extends View {
     }
 
     public void updateKeySignature(KeySignature k){
-        //TODO: Draw key signature
-        canvas.drawText(k.toString(), 150f, 150f, testPaint);
+        keySignature = k;
     }
 
     /**
@@ -357,8 +354,26 @@ public class Drawer extends View {
         }
     }
 
-    public void drawKeySignature(KeySignature keySignature){
+    public void drawKeySignature(){
+        int accidentals = keySignature.getAccidentals();
+        boolean containsSharps = keySignature.getContainsSharps();
+        String symbol;
+        float[] heights;
 
+        if (containsSharps){
+            symbol = symbols.get("sharp");
+            heights = sharpHeights;
+        } else {
+            symbol = symbols.get("flat");
+            heights = flatHeights;
+        }
+
+        int i = 0;
+        while (accidentals > i){
+            canvas.drawText(symbol, currentX - 20, heights[i] + PADDING_TOP, notePaint);
+            currentX += 60;
+            i++;
+        }
     }
 
     public void toggleScrolling(){

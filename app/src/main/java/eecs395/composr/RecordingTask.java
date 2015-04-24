@@ -7,7 +7,6 @@ import android.util.Log;
 
 import eecs395.composr.draw.Drawer;
 import eecs395.composr.musicUtils.TimeSignature;
-import eecs395.composr.musicUtils.TimeSignatures;
 
 public class RecordingTask {
 
@@ -266,7 +265,7 @@ public class RecordingTask {
     }
 
     public void updateTimeSignature(int i){
-        setTimeSignature(TimeSignatures.getTimeSignatureFromIndex(i));
+        setTimeSignature(TimeSignature.getTimeSignatureFromIndex(i));
     }
 
 }
