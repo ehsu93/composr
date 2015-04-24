@@ -1,8 +1,5 @@
 package eecs395.composr;
 
-/**
- * Created by meaghan on 3/4/15.
- */
 public class SampleBeatPair {
     private int sample;
     private int beat;

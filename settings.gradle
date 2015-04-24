@@ -1,0 +1,1 @@
+include ':app', ':jfugue-android', ':mod_xmlapis', ':mod_xalan', ':mod_xerces', ':MIDIDriver'
