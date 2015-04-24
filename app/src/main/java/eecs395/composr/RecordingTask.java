@@ -3,11 +3,7 @@ package eecs395.composr;
 import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
-
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.util.Log;
-import android.widget.LinearLayout;
 
 import eecs395.composr.draw.Drawer;
 

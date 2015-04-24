@@ -1,7 +1,7 @@
 package eecs395.composr;
 
 import android.media.MediaPlayer;
-import eecs395.proj.composr.R;
+import eecs395.composr.R;
 
 public class PitchPipe {
     MediaPlayer currentPlayer;

@@ -3,13 +3,15 @@ apply plugin: 'com.android.application'
 android {
     compileSdkVersion 21
     buildToolsVersion '20.0.0'
+
     defaultConfig {
-        applicationId "eecs395.composr"
+        applicationId "kenthacks.eric.composr"
         minSdkVersion 15
         targetSdkVersion 20
         versionCode 1
         versionName "1.0"
     }
+
     buildTypes {
         release {
             debuggable true
@@ -17,6 +19,7 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+
 }
 
 dependencies {

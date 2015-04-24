@@ -9,4 +9,3 @@ MIDIDriver/build/
 *.java~
 *.class
 .gitignore~
-*.iml

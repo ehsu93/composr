@@ -1,6 +1,8 @@
 package eecs395.composr;
 
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.Context;
@@ -9,6 +11,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -31,13 +34,16 @@ import be.tarsos.dsp.io.android.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
+import eecs395.composr.R;
 import eecs395.composr.draw.Drawer;
-import eecs395.proj.composr.R;
 
 import java.io.File;
 import java.io.IOException;
 
 public class MyActivity extends Activity {
+
+    //private static final String DNAME = "/composr_files";
+
     /** RecordingTask instance */
     RecordingTask rt;
 
@@ -57,7 +63,7 @@ public class MyActivity extends Activity {
     AudioDispatcher dispatcher;
 
     /** mContext */
-    private static Context mContext;
+    Context mContext = this;
 
     /** Default name of file */
     String givenName = "myMusic";
@@ -71,7 +77,6 @@ public class MyActivity extends Activity {
     /** Store the bpm */
     int bpm = 120;
 
-    /** Store the height and width */
     int HEIGHT;
     int WIDTH;
 
@@ -99,6 +104,23 @@ public class MyActivity extends Activity {
 
         setContentView(R.layout.activity_my); // defines the screen layout of the application
 
+        LinearLayout noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
+
+        // get height and width of screen
+        Display display = getWindowManager().getDefaultDisplay();
+        Point size = new Point();
+        display.getSize(size);
+        WIDTH = size.x;
+        HEIGHT = size.y;
+
+        // Draw the notes
+        dn = new Drawer(this);
+        Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        dn.draw(canvas);
+        dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
+        noteLayout.addView(dn);
+
         // initializes the area at the tpo of the screen where notes are displayed
         noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
 
@@ -116,6 +138,32 @@ public class MyActivity extends Activity {
 
         // initialize object that converts pattern to MusicXML
         pa = new PatternToMUSICXML();
+
+        final Button openPdf = (Button) findViewById(R.id.pdfOpen);
+        openPdf.setOnClickListener(new View.OnClickListener() {
+            TextView name = (TextView) findViewById(R.id.SheetMusicName);
+            String fileName = name.getText().toString() + ".pdf";
+            @Override
+            public void onClick(View v) {
+                File file = new File(fileName);
+                if (file.exists()) {
+                    Uri path = Uri.fromFile(file);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(path, "/Music/");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                    try {
+                        startActivity(intent);
+                    }
+                    catch (ActivityNotFoundException e) {
+                        Toast.makeText(MyActivity.this,
+                                "No Application Available to View PDF",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+            }
+        });
 
         pipe = new PitchPipe();
         dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
@@ -161,6 +209,7 @@ public class MyActivity extends Activity {
         int id = item.getItemId();
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
+
 
     public static Context getContext(){
         return mContext;
@@ -437,10 +486,6 @@ public class MyActivity extends Activity {
 
                                 previousPattern = rt.pattern;
 
-                                //}
-
-                                // scroll
-                                // dn.scrollBy(150, 0);
                             }
                         }
 

@@ -1,9 +1,8 @@
 package eecs395.composr;
 
 import android.media.MediaPlayer;
-import android.content.Context;
 
-import eecs395.proj.composr.R;
+import eecs395.composr.R;
 
 public class Metronome {
 
@@ -11,6 +10,7 @@ public class Metronome {
 
     /**
      * Constructor for metronome object
+     *
      */
     public Metronome(){
         this.m = MediaPlayer.create(MyActivity.getContext(), R.raw.tick);
