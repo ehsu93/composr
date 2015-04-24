@@ -5,13 +5,11 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.app.AlertDialog;
 import android.app.Dialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Point;
-import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
@@ -34,15 +32,12 @@ import be.tarsos.dsp.io.android.AudioDispatcherFactory;
 import be.tarsos.dsp.pitch.PitchDetectionHandler;
 import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
-import eecs395.composr.R;
 import eecs395.composr.draw.Drawer;
 
 import java.io.File;
 import java.io.IOException;
 
 public class MyActivity extends Activity {
-
-    //private static final String DNAME = "/composr_files";
 
     /** RecordingTask instance */
     RecordingTask rt;
@@ -63,7 +58,7 @@ public class MyActivity extends Activity {
     AudioDispatcher dispatcher;
 
     /** mContext */
-    Context mContext = this;
+    private static Context mContext;
 
     /** Default name of file */
     String givenName = "myMusic";
@@ -102,30 +97,12 @@ public class MyActivity extends Activity {
 
         super.onCreate(savedInstanceState); // this must be the first line
 
-        setContentView(R.layout.activity_my); // defines the screen layout of the application
-
-        LinearLayout noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
-
-        // get height and width of screen
-        Display display = getWindowManager().getDefaultDisplay();
-        Point size = new Point();
-        display.getSize(size);
-        WIDTH = size.x;
-        HEIGHT = size.y;
-
-        // Draw the notes
-        dn = new Drawer(this);
-        Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(result);
-        dn.draw(canvas);
-        dn.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
-        noteLayout.addView(dn);
-
-        // initializes the area at the tpo of the screen where notes are displayed
-        noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
-
         // set mContext so that other parts of the application can access the context
         mContext = this;
+
+        setContentView(R.layout.activity_my); // defines the screen layout of the application
+
+        noteLayout = (LinearLayout) findViewById(R.id.NoteDisplay);
 
         initializeHeightAndWidth(); // get height and width of screen
         initializeDrawer(); // Initialize drawer to draw anything necessary on the canvas
@@ -139,39 +116,13 @@ public class MyActivity extends Activity {
         // initialize object that converts pattern to MusicXML
         pa = new PatternToMUSICXML();
 
-        final Button openPdf = (Button) findViewById(R.id.pdfOpen);
-        openPdf.setOnClickListener(new View.OnClickListener() {
-            TextView name = (TextView) findViewById(R.id.SheetMusicName);
-            String fileName = name.getText().toString() + ".pdf";
-            @Override
-            public void onClick(View v) {
-                File file = new File(fileName);
-                if (file.exists()) {
-                    Uri path = Uri.fromFile(file);
-                    Intent intent = new Intent(Intent.ACTION_VIEW);
-                    intent.setDataAndType(path, "/Music/");
-                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-
-                    try {
-                        startActivity(intent);
-                    }
-                    catch (ActivityNotFoundException e) {
-                        Toast.makeText(MyActivity.this,
-                                "No Application Available to View PDF",
-                                Toast.LENGTH_SHORT).show();
-                    }
-                }
-
-            }
-        });
-
         pipe = new PitchPipe();
         dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
 
         final Dialog dialog = createPitchPipeDialog();
         createPitchPipeSpinner(dialog);
 
-        // create buttons
+        // create buttons. This is where all of the buttons go
         final Button beatsButton = (Button) findViewById(R.id.beats);
         final Button tempoButton = (Button) findViewById(R.id.tempo);
         final Button listenButton = (Button) findViewById(R.id.Toggle);
@@ -179,8 +130,9 @@ public class MyActivity extends Activity {
         final Button pitchPipeButton = (Button) findViewById(R.id.pitchPipeButton);
         final Button stopPitchPipeButton = (Button) dialog.findViewById(R.id.stop_pitchpipe);
         final Button sendEmailButton = (Button) findViewById(R.id.sendEmail);
+        final Button openPdfButton = (Button) findViewById(R.id.pdfOpen);
 
-        // set button listeners
+        // set button listeners. This is where all of the listeners are added.
         beatsButton.setOnClickListener(getBeatsListener(beatsButton));
         tempoButton.setOnClickListener(getTempoListener(tempoButton));
         listenButton.setOnClickListener(getListenListener(listenButton));
@@ -188,6 +140,7 @@ public class MyActivity extends Activity {
         sendEmailButton.setOnClickListener(getSendEmailListener());
         pitchPipeButton.setOnClickListener(getPitchPipeButtonListener(dialog));
         stopPitchPipeButton.setOnClickListener(getStopPitchPipeButtonListener());
+        openPdfButton.setOnClickListener(getOpenPdfListener());
 
         dispatcher.addAudioProcessor(getAudioProcessor());
 
@@ -209,7 +162,6 @@ public class MyActivity extends Activity {
         int id = item.getItemId();
         return id == R.id.action_settings || super.onOptionsItemSelected(item);
     }
-
 
     public static Context getContext(){
         return mContext;
@@ -279,7 +231,7 @@ public class MyActivity extends Activity {
             @Override
             public void onClick(View view) {
                 Toast.makeText(mContext, rt.pattern, Toast.LENGTH_LONG).show();
-                promptForFilename();
+                promptForExportFilename();
             }
         };
     }
@@ -289,7 +241,7 @@ public class MyActivity extends Activity {
             public void onClick(View v){
                 if (!isCurrentPatternSaved) {
                     waitingOnFileName = true;
-                    promptForFilename();
+                    promptForExportFilename();
                 } else {
                     sendEmail();
                 }
@@ -311,6 +263,15 @@ public class MyActivity extends Activity {
             @Override
             public void onClick(View view){
                 pipe.stop();
+            }
+        };
+    }
+
+    public View.OnClickListener getOpenPdfListener(){
+        return new View.OnClickListener(){
+            @Override
+            public void onClick(View view){
+                promptForOpenFilename();
             }
         };
     }
@@ -412,7 +373,7 @@ public class MyActivity extends Activity {
         });
     }
 
-    public void promptForFilename(){
+    public void promptForExportFilename(){
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Export to MusicXML");
 
@@ -432,6 +393,47 @@ public class MyActivity extends Activity {
                     dialog.cancel();
                     Toast.makeText(mContext, "Preparing file to send...", Toast.LENGTH_LONG);
                     sendEmail();
+                }
+            }
+        });
+        builder.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+
+        builder.show();
+    }
+
+    public void promptForOpenFilename(){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Open sheet music");
+
+        final EditText input = new EditText(this);
+        input.setHint("Enter file name");
+        builder.setView(input);
+
+        // Set up the buttons
+        builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String fileName = input.getText().toString() + ".pdf";
+                File file = new File(fileName);
+                if (file.exists()) {
+                    Uri path = Uri.fromFile(file);
+                    Intent intent = new Intent(Intent.ACTION_VIEW);
+                    intent.setDataAndType(path, "/Music/");
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+
+                    try {
+                        startActivity(intent);
+                    }
+                    catch (ActivityNotFoundException e) {
+                        Toast.makeText(MyActivity.this,
+                                "No Application Available to View PDF",
+                                Toast.LENGTH_SHORT).show();
+                    }
                 }
             }
         });
