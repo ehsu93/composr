@@ -7,13 +7,14 @@
         android:id="@+id/makeMusic"
         android:text="Export to MusicXML"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        style="?android:attr/borderlessButtonStyle" />
 
     <Button
         android:id="@+id/sendEmail"
         android:text="Send as email attachment"
         android:layout_height="wrap_content"
         android:layout_width="match_parent"
-        />
+        style="?android:attr/borderlessButtonStyle" />
 
 </LinearLayout>

@@ -155,4 +155,8 @@ public class Note {
             return this.higherThan(new Note("C3"));
         }
     }
+
+    public String toString(){
+        return "Note at " + name;
+    }
 }

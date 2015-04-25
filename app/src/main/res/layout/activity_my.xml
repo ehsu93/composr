@@ -31,6 +31,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
+            <!-- l
             <TextView
                 android:id = "@+id/Pitch"
                 android:text="Pitch Frequency"
@@ -43,13 +44,7 @@
                 android:text="Note name"
                 android:gravity="center"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" />
-
-            <Button
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:id="@+id/settings"
-                android:text="Recording Settings"/>
+                android:layout_height="wrap_content" /> -->
 
             <Button
                 android:id = "@+id/Toggle"
@@ -57,17 +52,23 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
 
-            <Button
-                android:id = "@+id/share_button"
-                android:text="Save &amp; Share"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
+                <Button
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/settings"
+                    android:text="Recording Settings"/>
 
-            <Button
-                android:id="@+id/tools_button"
-                android:text="Tools"
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content" />
+                <Button
+                    android:id = "@+id/share_button"
+                    android:text="Save &amp; Share"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
+
+                <Button
+                    android:id="@+id/tools_button"
+                    android:text="Tools"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content" />
 
         </LinearLayout>
     </LinearLayout>

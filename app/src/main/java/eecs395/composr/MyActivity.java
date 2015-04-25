@@ -25,7 +25,6 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import be.tarsos.dsp.AudioDispatcher;
@@ -79,6 +78,7 @@ public class MyActivity extends Activity {
 
     /** Whether the program is currently listening to input */
     private boolean listening;
+    private boolean hasListened = false;
 
     /** Indicates whether the last pattern recorded has been saved to the device
      *  Default value is false because nothing has been recorded yet */
@@ -91,6 +91,9 @@ public class MyActivity extends Activity {
 
     /** Stores the last file that has been saved on the device for emailing purposes */
     private File lastSavedFile;
+
+    /** Store these buttons because they need to be disabled during recording */
+    Button[] buttonsOnMainScreen;
 
     /**
      * Everything that happens when the application is first started
@@ -155,7 +158,7 @@ public class MyActivity extends Activity {
 
         // buttons on the main screen
         settingsButton.setOnClickListener(showDialogListener(settingsDialog));
-        listenButton.setOnClickListener(getListenListener(listenButton));
+        listenButton.setOnClickListener(getListenListener(listenButton, timeSignatureDialog));
         shareButton.setOnClickListener(showDialogListener(shareDialog));
         toolsButton.setOnClickListener(showDialogListener(toolsDialog));
 
@@ -174,7 +177,8 @@ public class MyActivity extends Activity {
         stopPitchPipeButton.setOnClickListener(getStopPitchPipeButtonListener());
         openPdfButton.setOnClickListener(getOpenPdfListener());
 
-        keyButton.setEnabled(true);
+        // save the button as a field so it can be disabled later
+        buttonsOnMainScreen = new Button[]{settingsButton, shareButton, toolsButton};
 
         // initialize audio dispatcher
         dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
@@ -273,7 +277,8 @@ public class MyActivity extends Activity {
      * @param listenButton Indicates whether to stop or start listening
      * @return The OnClickListener for the Listen button
      */
-    public View.OnClickListener getListenListener(final Button listenButton){
+    public View.OnClickListener getListenListener(final Button listenButton,
+                                                  final Dialog timeSignatureDialog){
         return new View.OnClickListener() {
             public void onClick(View v) {
 
@@ -284,12 +289,17 @@ public class MyActivity extends Activity {
                 if (buttonText.equals("Stop Listening")) {
                     listenButton.setText("Listen");
                     listening = false;
+                    setButtonsEnabled(buttonsOnMainScreen, true);
+                    noteLayout.setOnTouchListener(getNoteLayoutListener(timeSignatureDialog));
                 }
 
                 // start listening to the user
                 else {
                     listenButton.setText("Stop Listening");
+                    hasListened = true;
                     listening = true;
+                    setButtonsEnabled(buttonsOnMainScreen, false);
+                    noteLayout.setOnTouchListener(getEmptyOnTouchListener());
                 }
 
                 /* Whether the user just started or just stopped recording, the current pattern has
@@ -682,20 +692,21 @@ public class MyActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
+                        /*
                         TextView text = (TextView) findViewById(R.id.Pitch);
                         text.setText("" + pitchInHz);
                         TextView text2 = (TextView) findViewById(R.id.Note);
-                        text2.setText("" + note);
+                        text2.setText("" + note);*/
 
                         if (listening) {
                             // check with current pattern in recording task
-                            if (!previousPattern.equals(rt.pattern)) {
-
+                            if (!previousPattern.equals(rt.pattern) && !previousPattern.equals("")){
                                 // update displayed pattern
-                                int i = previousPattern.length();
+                                int len = previousPattern.length();
                                 boolean notDone = true;
+                                Log.i("drawnotetest", "pattern = " + previousPattern);
                                 while (notDone) {
-                                    int space = rt.pattern.indexOf(" ", i);
+                                    int space = rt.pattern.indexOf(" ", len);
                                     int nextSpace = rt.pattern.indexOf(" ", space + 1);
 
                                     if (nextSpace == -1) {
@@ -704,9 +715,9 @@ public class MyActivity extends Activity {
                                     }
 
                                     String nextPiece = rt.pattern.substring(space + 1, nextSpace);
-                                    i = nextSpace;
+                                    len = nextSpace;
                                     Log.i("drawnotetest", "next note to draw = [" + nextPiece + "]");
-                                    drawer.drawNote(nextPiece);
+                                    drawer.draw(nextPiece);
                                 }
 
                                 previousPattern = rt.pattern;
@@ -718,5 +729,11 @@ public class MyActivity extends Activity {
                 });
             }
         });
+    }
+
+    public void setButtonsEnabled(Button[] buttons, boolean enabled){
+        for (Button b: buttons){
+            b.setEnabled(enabled);
+        }
     }
 }

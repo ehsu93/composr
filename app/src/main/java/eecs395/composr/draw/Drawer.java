@@ -7,6 +7,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.View;
 
 import com.opencsv.CSVReader;
@@ -155,6 +156,9 @@ public class Drawer extends View {
         // offset for ledger lines. Default is no ledger lines, hence offset = 0
         offset = 0;
 
+        // populates the notes hashtable
+        createNoteObjects();
+
         this.scrolling = false;
     }
 
@@ -182,12 +186,7 @@ public class Drawer extends View {
                 4 * SPACE_BETWEEN_LINES + PADDING_TOP + offset, timePaint);
         currentX += 150;
 
-        // populates the notes hashtable
-        createNoteObjects();
 
-        // to test that drawing a note will work
-        //test();
-        drawRest("");
     }
 
     public void createNoteObjects(){
@@ -224,16 +223,6 @@ public class Drawer extends View {
 
     }
 
-    public void test(){
-        drawNote("F4");
-        drawNote("C5");
-        drawNote("D5");
-        drawNote("D4");
-
-        drawBarLine();
-        drawRest("");
-    }
-
     public void drawNote(Note note, String duration){
         String symbol = note.getSymbol(clef, duration);
 
@@ -246,6 +235,9 @@ public class Drawer extends View {
     public void drawNote(String name, String duration){
         Note note = notes.get(name);
         drawNote(note, duration);
+        Log.i("testDraw", "note: " + name);
+        Log.i("testDraw", "Note: " + note.toString());
+        Log.i("testDraw", "dur: " + duration);
     }
 
     public void drawNote(String name){
