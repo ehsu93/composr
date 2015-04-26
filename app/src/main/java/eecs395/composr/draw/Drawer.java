@@ -217,14 +217,14 @@ public class Drawer extends View {
 
         // draw the clef on the canvas
         canvas.drawText(clef, xCursor, clefYOffset + offset, clefPaint);
-        moveXCursor(300);
+        moveXCursor(150);
 
         drawKeySignature();
 
         // draw the time signature on the canvas
         canvas.drawText(timeSignature, xCursor,
                 4 * SPACE_BETWEEN_LINES + PADDING_TOP + offset, timePaint);
-        moveXCursor();
+        moveXCursor(150);
     }
 
     /**
