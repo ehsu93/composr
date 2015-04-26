@@ -24,7 +24,7 @@ public class RecordingTask {
     SampleBeatPair currentPosition;
 
     String previousNote;
-    int sameNoteStreak;
+    int sameNoteStreak = 0;
 
     // instances of other classes in the application
     Metronome metronome;
