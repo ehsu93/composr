@@ -23,8 +23,8 @@ public class Symbols {
             put("quarterNoteStemDown", "ö");
             put("quarterNoteStemUp", "ô");
 
-            put("eigthNoteStemDown", "");
-            put("eightNoteStemUp", "");
+            put("eighthNoteStemDown", "Ê");
+            put("eighthNoteStemUp", "É");
 
             put("sixteenthNoteStemDown", "");
             put("sixteenthNoteStemUp", "");
@@ -35,7 +35,7 @@ public class Symbols {
             put("halfRestdot", "H");    // 12
             put("quarterRest", "Q");    // 4
             put("quarterRestDot", "J"); // 6
-            put("eighthRest", "L");     // 2
+            put("eighthRest", "E");     // 2
             put("eighthRestDot", "P");  // 3
             put("sixteenthRest", "Z");  // 1
 

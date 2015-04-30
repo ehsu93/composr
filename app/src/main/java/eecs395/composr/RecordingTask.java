@@ -92,7 +92,7 @@ public class RecordingTask {
                                 "\n\tprevious note: " +
                                 "\n\tsamples: " + Integer.toString(sameNoteStreak));
                         updatePattern(note, sameNoteStreak);
-                        updateDisplay(note, sameNoteStreak);
+                        //updateDisplay(note, sameNoteStreak);
 
                         // reset same note streak
                         sameNoteStreak = 0;

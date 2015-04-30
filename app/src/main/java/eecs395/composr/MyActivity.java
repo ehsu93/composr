@@ -25,6 +25,7 @@ import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.Spinner;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import be.tarsos.dsp.AudioDispatcher;
@@ -95,6 +96,8 @@ public class MyActivity extends Activity {
     /** Store these buttons because they need to be disabled during recording */
     Button[] buttonsOnMainScreen;
 
+    Button generateMusicXMLButton;
+
     /**
      * Everything that happens when the application is first started
      */
@@ -144,7 +147,7 @@ public class MyActivity extends Activity {
         final Button clefButton = (Button) settingsDialog.findViewById(R.id.changeClef);
 
         // save/share dialog buttons
-        final Button generateMusicXMLButton = (Button) shareDialog.findViewById(R.id.makeMusic);
+        generateMusicXMLButton = (Button) shareDialog.findViewById(R.id.makeMusic);
         final Button sendEmailButton = (Button) shareDialog.findViewById(R.id.sendEmail);
 
         // tools dialog buttons
@@ -291,6 +294,7 @@ public class MyActivity extends Activity {
                     listening = false;
                     setButtonsEnabled(buttonsOnMainScreen, true);
                     noteLayout.setOnTouchListener(getNoteLayoutListener(timeSignatureDialog));
+                    generateMusicXMLButton.performClick();
                 }
 
                 // start listening to the user
@@ -692,11 +696,11 @@ public class MyActivity extends Activity {
                 runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        /*
+
                         TextView text = (TextView) findViewById(R.id.Pitch);
                         text.setText("" + pitchInHz);
                         TextView text2 = (TextView) findViewById(R.id.Note);
-                        text2.setText("" + note);*/
+                        text2.setText("" + note);
 
                         if (listening) {
                             // check with current pattern in recording task

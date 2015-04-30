@@ -225,6 +225,24 @@ public class Drawer extends View {
         canvas.drawText(timeSignature, xCursor,
                 4 * SPACE_BETWEEN_LINES + PADDING_TOP + offset, timePaint);
         moveXCursor(150);
+
+        //test();
+    }
+
+    public void test(){
+        canvas.drawText(symbols.get("eighthRest"), xCursor, 250, notePaint);
+        moveXCursor(150);
+
+        canvas.drawText(symbols.get("eighthNoteStemUp"), xCursor, 225, notePaint);
+        moveXCursor(150);
+
+        canvas.drawText(symbols.get("quarterNoteStemDown"), xCursor, 300, notePaint);
+        moveXCursor(150);
+
+        canvas.drawText(symbols.get("eighthNoteStemDown"), xCursor, 275, notePaint);
+        moveXCursor(150);
+
+        //canvas.drawText(symbols.get("eighthRest"), xCursor, 250, notePaint);
     }
 
     /**
@@ -278,8 +296,8 @@ public class Drawer extends View {
         String symbol = note.getSymbol(clef, duration);
 
         // draw the note on the canvas
-        canvas.drawText(symbol, xCursor, note.getPosition(clef, SPACE_BETWEEN_LINES) + offset,
-                notePaint);
+        canvas.drawText(symbol, xCursor,
+                note.getPosition(clef, SPACE_BETWEEN_LINES) + offset + PADDING_TOP, notePaint);
 
         moveXCursor();
     }
