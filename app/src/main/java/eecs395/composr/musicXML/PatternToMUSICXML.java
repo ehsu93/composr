@@ -1,4 +1,4 @@
-package eecs395.composr;
+package eecs395.composr.musicXML;
 
 import android.os.Environment;
 import android.widget.Toast;
@@ -12,6 +12,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
+import eecs395.composr.Composr;
 import nu.xom.Serializer;
 
 public class PatternToMUSICXML {
@@ -29,7 +30,7 @@ public class PatternToMUSICXML {
             MusicStringParser parser = new MusicStringParser();
             parser.addParserListener(renderer);
 
-            Toast.makeText(MyActivity.getContext(), "Written to " +
+            Toast.makeText(Composr.getContext(), "Written to " +
                             Environment.getExternalStorageDirectory() + PARENT_DIR + givenName + ".musicxml",
                     Toast.LENGTH_LONG).show();
 

@@ -1,4 +1,4 @@
-package eecs395.composr;
+package eecs395.composr.process;
 
 public class SampleBeatPair {
     private int sample;

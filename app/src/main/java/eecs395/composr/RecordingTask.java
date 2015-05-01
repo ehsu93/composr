@@ -1,12 +1,17 @@
 package eecs395.composr;
 
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.Timer;
 import java.util.TimerTask;
-import android.util.Log;
 
 import eecs395.composr.draw.Drawer;
+import eecs395.composr.io.SoundPlayer;
 import eecs395.composr.musicUtils.TimeSignature;
+import eecs395.composr.process.FrequencyAnalyzer;
+import eecs395.composr.process.RecordedFrequencies;
+import eecs395.composr.process.RecordedNote;
+import eecs395.composr.process.SampleBeatPair;
 
 public class RecordingTask {
 
@@ -23,11 +28,10 @@ public class RecordingTask {
     SampleBeatPair previousPosition;
     SampleBeatPair currentPosition;
 
-    String previousNote;
+    String previousPitch;
     int sameNoteStreak = 0;
 
     // instances of other classes in the application
-    Metronome metronome;
     FrequencyAnalyzer fr;
     RecordedFrequencies rf;
     Drawer d;
@@ -42,6 +46,8 @@ public class RecordingTask {
     int end;
     int count;
 
+    private static LinkedList<RecordedNote> recordedNotes;
+
     public RecordingTask(int tempo, TimeSignature timeSignature, Drawer d){
         this.bpm = tempo;
         this.timeSignature = timeSignature;
@@ -50,13 +56,14 @@ public class RecordingTask {
         // determines the accuracy of the application
         this.samplesPerBeat = 4;
 
-        this.metronome = new Metronome();
         this.fr = new FrequencyAnalyzer();
         this.rf = new RecordedFrequencies();
 
         this.currentPosition = new SampleBeatPair(0, 0, 0);
         this.start = 0;
-        this.previousNote = "R";
+        this.previousPitch = "R";
+
+        this.recordedNotes = new LinkedList<>();
     }
 
     public void addFreq(Float freq){
@@ -75,30 +82,19 @@ public class RecordingTask {
 
                 if(countdownComplete){
                     end = count;
-                    Log.i("samplecount", Integer.toString(count));
 
                     float median = rf.getMedian(start, end);
-
-                    Log.i("median", Float.toString(median));
                     
-                    String note = fr.getNoteFromFreq(median);
+                    String pitch = fr.getNoteFromFreq(median);
 
-                    if (note.equals(previousNote)){
-                        Log.i("recording-task", "same note...");
+                    if (pitch.equals(previousPitch)){
                         sameNoteStreak++;
                     } else {
-                        Log.i("recording-task",
-                                "\n\tend of note: " + note +
-                                "\n\tprevious note: " +
-                                "\n\tsamples: " + Integer.toString(sameNoteStreak));
-                        updatePattern(note, sameNoteStreak);
-                        //updateDisplay(note, sameNoteStreak);
+                        RecordedNote note = new RecordedNote(pitch, getDurationString(sameNoteStreak));
 
-                        // reset same note streak
                         sameNoteStreak = 0;
 
-                        // update previousFreq
-                        previousNote = note;
+                        previousPitch = pitch;
                     }
                     start = end;
                 }
@@ -114,7 +110,7 @@ public class RecordingTask {
                 }
 
                 if (currentPosition.isNewBeat()){
-                    metronome.playTick();
+                    SoundPlayer.Metronome.playTick();
                 }
 
             }
@@ -146,8 +142,7 @@ public class RecordingTask {
 
     public void updatePattern(String note, int duration){
         String durationString = getDurationString(duration);
-        pattern += note + durationString + " ";
-        Log.i("current-pattern:", pattern);
+        recordedNotes.add(new RecordedNote(note, durationString));
     }
 
     /**
@@ -200,12 +195,12 @@ public class RecordingTask {
 
     }
 
-    public void updateDisplay(String note, int duration){
-        if (note == "R"){
+    public void updateDisplay(RecordedNote recordedNote){
+        if (!recordedNote.getPitch().equals("R")){
             // TODO find a different way to represent different length rests
-            d.drawRest(getDurationString(duration));
+            d.drawRest(recordedNote.getDuration());
         } else {
-            d.drawNote(note, getDurationString(duration));
+            d.drawNote(recordedNote);
         }
 
         if (displayPattern.length() > 20) {

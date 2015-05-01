@@ -1,12 +1,13 @@
-package eecs395.composr;
+package eecs395.composr.process;
 
-import android.content.Context;
 import com.opencsv.CSVReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
 import java.util.List;
+
+import eecs395.composr.Composr;
 
 /**
  * Contains all of the valid frequencies and their corresponding notes, performs operations that
@@ -43,7 +44,7 @@ public class FrequencyAnalyzer {
             FREQUENCIES = new Float[88];
 
             // open note_frequencies file, create CSVReader
-            InputStream is = MyActivity.getContext().getAssets().open("note_frequencies.csv");
+            InputStream is = Composr.getContext().getAssets().open("note_frequencies.csv");
             CSVReader reader = new CSVReader(new InputStreamReader(is));
 
             // all the note, frequency pairs from the CSV

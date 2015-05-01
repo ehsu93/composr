@@ -2,12 +2,14 @@ package eecs395.composr.draw;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
 import android.view.View;
+import android.widget.LinearLayout;
 
 import com.opencsv.CSVReader;
 
@@ -17,9 +19,10 @@ import java.io.InputStreamReader;
 import java.util.Hashtable;
 import java.util.List;
 
-import eecs395.composr.MyActivity;
+import eecs395.composr.Composr;
 import eecs395.composr.musicUtils.KeySignature;
 import eecs395.composr.musicUtils.TimeSignature;
+import eecs395.composr.process.RecordedNote;
 
 public class Drawer extends View {
 
@@ -27,7 +30,7 @@ public class Drawer extends View {
     Paint staffPaint;
 
     /** Paint object for the clef */
-    Paint clefPaint;
+    static Paint clefPaint;
 
     /** Paint object for the time signature */
     Paint timePaint;
@@ -41,10 +44,10 @@ public class Drawer extends View {
     Hashtable<String, Note> notes;
 
     /** Stores all of the symbol/name pairs */
-    Symbols symbols;
+    static Symbols symbols;
 
     /** Distance between top of canvas and everything drawn */
-    final int PADDING_TOP = 75;
+    static final int PADDING_TOP = 75;
 
     /** Distance between bottom of canvas and everything drawn */
     //final int PADDING_BOTTOM = 20;
@@ -56,7 +59,7 @@ public class Drawer extends View {
     final int PADDING_RIGHT = 20;
 
     /** Space between the lines in the staff */
-    final int SPACE_BETWEEN_LINES = 50;
+    static final int SPACE_BETWEEN_LINES = 50;
 
     /** Width of the canvas */
     final int WIDTH;
@@ -67,10 +70,10 @@ public class Drawer extends View {
     KeySignature keySignature = KeySignature.C_MAJOR;
 
     /** The one-letter string that represents the current clef */
-    String clef;
+    static String clef;
 
     /** The y-offset for the current clef */
-    float clefYOffset;
+    static float clefYOffset;
 
     /** offset for everything, for ledger lines above the staff*/
     float offset;
@@ -85,7 +88,7 @@ public class Drawer extends View {
     Canvas canvas;
 
     /** Indicates whether or not music is scrolling */
-    boolean scrolling;
+    //boolean scrolling;
 
     float xoffset = 0;
 
@@ -140,6 +143,12 @@ public class Drawer extends View {
         createNoteObjects();
 
         // this.scrolling = false; Not implemented yet
+
+        Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(result);
+        this.draw(canvas);
+        this.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
+
     }
 
     /**
@@ -175,7 +184,7 @@ public class Drawer extends View {
             notes = new Hashtable<>();
 
             // open notes.csv file, create CSVReader
-            InputStream is = MyActivity.getContext().getAssets().open("notes.csv");
+            InputStream is = Composr.getContext().getAssets().open("notes.csv");
             CSVReader reader = new CSVReader(new InputStreamReader(is));
 
             // creates a list of arrays representing each row in the CSV
@@ -251,6 +260,7 @@ public class Drawer extends View {
      *
      * @param toDraw The s
      */
+    /*
     public void draw(String toDraw){
 
         if (toDraw.contains("R")){
@@ -258,14 +268,15 @@ public class Drawer extends View {
         } else {
             drawNote(toDraw);
         }
-    }
+    }*/
 
     /**
      * Draw a note given a string from the pattern
      * Input will be in the form of "C#5i" or "D3e."
      *
-     * @param name The String taken from the pattern created in the Activity
+    // * @param name The String taken from the pattern created in the Activity
      */
+    /*
     public void drawNote(String name){
 
         String noteName;
@@ -280,20 +291,13 @@ public class Drawer extends View {
         }
 
         drawNote(noteName, duration);
-    }
+    }*/
 
-    /**
-     * Draw a note on the canvas given the Note and its duration
-     *
-     * @param name The name of the note to draw
-     * @param duration The duration of the note
-     */
-    public void drawNote(String name, String duration){
-        // get the Note associated with the input name
-        Note note = notes.get(name);
+    public void drawNote(RecordedNote recordedNote){
+        Note note = notes.get(recordedNote.getPitch());
 
         // get the symbol associated with a note of the given duration
-        String symbol = note.getSymbol(clef, duration);
+        String symbol = note.getSymbol(clef, recordedNote.getDuration());
 
         // draw the note on the canvas
         canvas.drawText(symbol, xCursor,
@@ -370,7 +374,7 @@ public class Drawer extends View {
      * Switch the clef displayed from treble to bass or vice versa. After using this method,
      * canvas.invalidate() must be called to update the display
      */
-    public void changeClef(){
+    public static void changeClef(){
         if (clef.equals(symbols.get("trebleClef"))){
             // decrease font size
             clefPaint.setTextSize(4.8f * SPACE_BETWEEN_LINES);
@@ -472,4 +476,7 @@ public class Drawer extends View {
         xCursor += distance;
     }
 
+    public void redraw(){
+        invalidate();
+    }
 }
