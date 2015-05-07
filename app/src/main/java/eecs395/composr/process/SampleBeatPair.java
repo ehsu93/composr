@@ -31,7 +31,7 @@ public class SampleBeatPair {
         return this.beat;
     }
 
-    public void incrememntSample(){
+    public void incrementSample(){
         this.sample++;
     }
 
@@ -51,5 +51,30 @@ public class SampleBeatPair {
 
     public boolean isNewMeasure(){
         return this.beat == 0;
+    }
+
+    public boolean isFirst(){
+        return sample == 0 && measure == 0;
+    }
+
+    public void increment(int samplesPerBeat, int beatsPerMeasure){
+        incrementSample();
+
+        if (this.sample == samplesPerBeat) {
+            incrementBeat();
+        }
+
+        if (this.beat == beatsPerMeasure) {
+            incrementMeasure();
+        }
+    }
+
+    public int getDistanceTilEndOfMeasure(int samplesPerBeat, int beatsPerMeasure){
+        int distance = 0;
+
+        distance += samplesPerBeat - sample;
+        distance += (beatsPerMeasure - beat) * samplesPerBeat;
+
+        return distance;
     }
 }

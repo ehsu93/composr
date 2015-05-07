@@ -21,7 +21,6 @@ import eecs395.composr.R;
 import eecs395.composr.io.EmailSender;
 import eecs395.composr.io.FileWriter;
 import eecs395.composr.io.SoundPlayer;
-import eecs395.composr.musicXML.PatternHandler;
 
 public class Dialogs {
 
@@ -171,7 +170,7 @@ public class Dialogs {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 String name = input.getText().toString();
-                FileWriter.writeToFile(name, PatternHandler.getPattern());
+                FileWriter.writeToFile(name);
 
                 if (EmailSender.isPendingEmail()){
                     EmailSender.setPendingEmail(false);

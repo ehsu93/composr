@@ -2,20 +2,26 @@ package eecs395.composr.process;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedList;
 
 /**
  * The recorded frequencies that go along with a recording task
+ * Wrapper for a LinkedList containing frequencies
  */
 public class RecordedFrequencies {
 
     /** A list containing all the frequencies that have been recorded */
-    ArrayList<Float> frequencies;
+    LinkedList<Float> frequencies;
 
     /**
      * Initializes the LinkedList containing all the frequencies
      */
     public RecordedFrequencies() {
-        frequencies = new ArrayList<>();
+        frequencies = new LinkedList<>();
+    }
+
+    public boolean hasFrequencies(){
+        return frequencies.size() > 0;
     }
 
     /**

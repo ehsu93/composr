@@ -6,10 +6,16 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.Path;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
 import com.opencsv.CSVReader;
 
@@ -17,40 +23,32 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Hashtable;
+import java.util.LinkedList;
 import java.util.List;
 
 import eecs395.composr.Composr;
+import eecs395.composr.R;
 import eecs395.composr.musicUtils.KeySignature;
 import eecs395.composr.musicUtils.TimeSignature;
 import eecs395.composr.process.RecordedNote;
+import eecs395.composr.ui.UserInterfaceController;
 
 public class Drawer extends View {
 
-    /** Paint object for the staff */
-    Paint staffPaint;
+    static Typeface noteTypeFace = Typeface.createFromAsset(Composr.getContext().getAssets(),
+            "fonts/MusiSync.ttf");
 
-    /** Paint object for the clef */
-    static Paint clefPaint;
-
-    /** Paint object for the time signature */
-    Paint timePaint;
-
-    /** Paint object for the notes */
-    Paint notePaint;
-
-    Paint testPaint;
+    static Paint staffPaint = createPaint(Color.BLACK, 1, null);
+    static Paint clefPaint = createPaint(Color.BLACK, 425, noteTypeFace);
+    static Paint notePaint = createPaint(Color.BLACK, 250, noteTypeFace);
+    static Paint timePaint = createPaint(Color.BLACK, 287.5f, noteTypeFace);
+    // static Paint testPaint = createPaint(Color.BLUE, 200, null);
 
     /** Stores all of the Note objects */
     Hashtable<String, Note> notes;
 
-    /** Stores all of the symbol/name pairs */
-    static Symbols symbols;
-
     /** Distance between top of canvas and everything drawn */
     static final int PADDING_TOP = 75;
-
-    /** Distance between bottom of canvas and everything drawn */
-    //final int PADDING_BOTTOM = 20;
 
     /** Distance between left of canvas and everything drawn */
     final int PADDING_LEFT = 20;
@@ -106,32 +104,18 @@ public class Drawer extends View {
     public Drawer(Context ctx){
         super(ctx);
 
-        // initialize Symbols object
-        symbols = new Symbols();
-
         xCursor = PADDING_LEFT;
-        xoffset = 0;
 
         // get width from display metrics
         DisplayMetrics dm = new DisplayMetrics();
         ((Activity)ctx).getWindowManager().getDefaultDisplay().getMetrics(dm);
         WIDTH = dm.widthPixels;
 
-        // get musical font
-        Typeface noteTypeFace = Typeface.createFromAsset(ctx.getAssets(), "fonts/MusiSync.ttf");
-
-        // initialize the Paint objects
-        staffPaint = createPaint(Color.BLACK, 1, null);
-        clefPaint = createPaint(Color.BLACK, 425, noteTypeFace);
-        notePaint = createPaint(Color.BLACK, 250, noteTypeFace);
-        timePaint = createPaint(Color.BLACK, 287.5f, noteTypeFace);
-        testPaint = createPaint(Color.BLUE, 200, null);
-
         // set default time signature to 4/4 time
-        timeSignature = symbols.get("4/4");
+        timeSignature = Symbols.get("4/4");
 
         // set the default clef to treble
-        clef = symbols.get("trebleClef");
+        clef = Symbols.get("trebleClef");
 
         // set the default clef offset to appropriate treble value
         clefYOffset = 275 + PADDING_TOP;
@@ -140,15 +124,12 @@ public class Drawer extends View {
         offset = 0;
 
         // populates the notes hashtable
-        createNoteObjects();
-
-        // this.scrolling = false; Not implemented yet
+        notes = Note.getAllNotes();
 
         Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
         this.draw(canvas);
         this.setLayoutParams(new LinearLayout.LayoutParams(WIDTH, 400));
-
     }
 
     /**
@@ -159,7 +140,7 @@ public class Drawer extends View {
      * @param typeface The typeface of the Paint object, null for default
      * @return An instance of Paint with the given values
      */
-    public Paint createPaint(int color, float textSize, Typeface typeface){
+    public static Paint createPaint(int color, float textSize, Typeface typeface){
 
         Paint p = new Paint();
 
@@ -175,44 +156,6 @@ public class Drawer extends View {
     }
 
     /**
-     * Initializes the hash table of Notes that is used to place the notes on the staff
-     */
-    public void createNoteObjects(){
-        try {
-
-            // initialize field
-            notes = new Hashtable<>();
-
-            // open notes.csv file, create CSVReader
-            InputStream is = Composr.getContext().getAssets().open("notes.csv");
-            CSVReader reader = new CSVReader(new InputStreamReader(is));
-
-            // creates a list of arrays representing each row in the CSV
-            List<String[]> notesList = reader.readAll();
-
-            // populate notes hashtable
-            for (String[] note : notesList) {
-                String name = note[0];
-                String clefPref = note[1];
-                int trebleLedgers = Integer.parseInt(note[2]);
-                int bassLedgers = Integer.parseInt(note[3]);
-                String spaceOrLine = note[4];
-                int index = Integer.parseInt(note[5]);
-
-                notes.put(name, new Note(name, clefPref, trebleLedgers, bassLedgers, spaceOrLine,
-                        index));
-
-            }
-
-        } catch (IOException e) {
-            // TODO
-            // Have never experienced the try block not working
-        }
-
-    }
-
-
-    /**
      * Method called when the canvas is drawn on the screen, draws the staff, clef, and time
      * signature
      *
@@ -220,6 +163,12 @@ public class Drawer extends View {
      */
     public void onDraw(Canvas canvas){
         this.canvas = canvas;
+
+        drawInitial();
+
+    }
+
+    public void drawInitial(){
         xCursor = PADDING_LEFT + xoffset;
 
         drawStaff();
@@ -234,24 +183,6 @@ public class Drawer extends View {
         canvas.drawText(timeSignature, xCursor,
                 4 * SPACE_BETWEEN_LINES + PADDING_TOP + offset, timePaint);
         moveXCursor(150);
-
-        //test();
-    }
-
-    public void test(){
-        canvas.drawText(symbols.get("eighthRest"), xCursor, 250, notePaint);
-        moveXCursor(150);
-
-        canvas.drawText(symbols.get("eighthNoteStemUp"), xCursor, 225, notePaint);
-        moveXCursor(150);
-
-        canvas.drawText(symbols.get("quarterNoteStemDown"), xCursor, 300, notePaint);
-        moveXCursor(150);
-
-        canvas.drawText(symbols.get("eighthNoteStemDown"), xCursor, 275, notePaint);
-        moveXCursor(150);
-
-        //canvas.drawText(symbols.get("eighthRest"), xCursor, 250, notePaint);
     }
 
     /**
@@ -260,44 +191,30 @@ public class Drawer extends View {
      *
      * @param toDraw The s
      */
-    /*
-    public void draw(String toDraw){
+    public void draw(RecordedNote toDraw){
 
-        if (toDraw.contains("R")){
-            drawRest("");
+        if (toDraw.getPitch().equals("R")){
+            drawRest(RecordedNote.getDurationString(toDraw.getDuration()));
         } else {
-            drawNote(toDraw);
+            drawNotes(toDraw);
         }
-    }*/
+    }
 
-    /**
-     * Draw a note given a string from the pattern
-     * Input will be in the form of "C#5i" or "D3e."
-     *
-    // * @param name The String taken from the pattern created in the Activity
-     */
-    /*
-    public void drawNote(String name){
+    public void drawNotes(RecordedNote recordedNote){
 
-        String noteName;
-        String duration;
+        LinkedList<RecordedNote> dividedNote = recordedNote.divideNotes();
 
-        if (name.contains("#")){
-            noteName = name.substring(0, 3);
-            duration = name.substring(3);
-        } else {
-            noteName = name.substring(0, 2);
-            duration = name.substring(2);
+        for (RecordedNote n : dividedNote) {
+            drawNote(n);
         }
+    }
 
-        drawNote(noteName, duration);
-    }*/
-
-    public void drawNote(RecordedNote recordedNote){
+    private void drawNote(RecordedNote recordedNote){
         Note note = notes.get(recordedNote.getPitch());
 
         // get the symbol associated with a note of the given duration
-        String symbol = note.getSymbol(clef, recordedNote.getDuration());
+        String symbol = note.getSymbol(clef,
+                RecordedNote.getDurationString(recordedNote.getDuration()));
 
         // draw the note on the canvas
         canvas.drawText(symbol, xCursor,
@@ -306,13 +223,14 @@ public class Drawer extends View {
         moveXCursor();
     }
 
+
     /**
      * Draws a rest on the canvas
      *
      * @param duration The duration of the rest to be drawn
      */
     public void drawRest(String duration) {
-        canvas.drawText(symbols.get("quarterRest"), xCursor, 250, notePaint);
+        canvas.drawText(Symbols.get("quarterRest"), xCursor, 250, notePaint);
         moveXCursor();
     }
 
@@ -358,7 +276,7 @@ public class Drawer extends View {
         int top = t.getTop();
         int bottom = t.getBottom();
 
-        timeSignature = symbols.get(Integer.toString(top) + "/" + Integer.toString(bottom));
+        timeSignature = Symbols.get(Integer.toString(top) + "/" + Integer.toString(bottom));
     }
 
     /**
@@ -375,7 +293,7 @@ public class Drawer extends View {
      * canvas.invalidate() must be called to update the display
      */
     public static void changeClef(){
-        if (clef.equals(symbols.get("trebleClef"))){
+        if (clef.equals(Symbols.get("trebleClef"))){
             // decrease font size
             clefPaint.setTextSize(4.8f * SPACE_BETWEEN_LINES);
 
@@ -383,7 +301,7 @@ public class Drawer extends View {
             clefYOffset = 165 + PADDING_TOP;
 
             // change character
-            clef = symbols.get("bassClef");
+            clef = Symbols.get("bassClef");
         } else {
             // increase font size
             clefPaint.setTextSize(8.5f * SPACE_BETWEEN_LINES);
@@ -392,7 +310,7 @@ public class Drawer extends View {
             clefYOffset = 275 + PADDING_TOP;
 
             // change character
-            clef = symbols.get("trebleClef");
+            clef = Symbols.get("trebleClef");
         }
 
     }
@@ -409,9 +327,9 @@ public class Drawer extends View {
         heights = getAccidentalHeights(containsSharps);
 
         if (containsSharps){
-            symbol = symbols.get("sharp");
+            symbol = Symbols.get("sharp");
         } else {
-            symbol = symbols.get("flat");
+            symbol = Symbols.get("flat");
         }
 
         int i = 0;
@@ -449,17 +367,8 @@ public class Drawer extends View {
      * @return Whether the current clef is the treble clef
      */
     public boolean isTrebleClef(){
-        return clef == symbols.get("trebleClef");
+        return clef == Symbols.get("trebleClef");
     }
-
-    /* Not implemented yet
-    public void toggleScrolling(){
-        this.scrolling = true;
-    }
-
-    public void scrollLeft(int left){
-        this.xoffset -= left;
-    }*/
 
     /**
      * Move the xCursor the default x increment
@@ -478,5 +387,14 @@ public class Drawer extends View {
 
     public void redraw(){
         invalidate();
+    }
+
+    public void reset(){
+        Path path = new Path();
+        Paint clearPaint = new Paint();
+        clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
+        canvas.drawRect(0, 0, 0, 0, clearPaint);
+
+        drawInitial();
     }
 }

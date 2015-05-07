@@ -1,5 +1,14 @@
 package eecs395.composr.draw;
+import com.opencsv.CSVReader;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.Arrays;
+import java.util.Hashtable;
+import java.util.List;
+
+import eecs395.composr.Composr;
 
 public class Note {
 
@@ -158,5 +167,36 @@ public class Note {
 
     public String toString(){
         return "Note at " + name;
+    }
+
+    public static Hashtable<String, Note> getAllNotes(){
+        Hashtable<String, Note> notes = new Hashtable<>();
+
+        try {
+            // open notes.csv file, create CSVReader
+            InputStream is = Composr.getContext().getAssets().open("notes.csv");
+            CSVReader reader = new CSVReader(new InputStreamReader(is));
+
+            // creates a list of arrays representing each row in the CSV
+            List<String[]> notesList = reader.readAll();
+
+            // populate notes hashtable
+            for (String[] note : notesList) {
+                String name = note[0];
+                String clefPref = note[1];
+                int trebleLedgers = Integer.parseInt(note[2]);
+                int bassLedgers = Integer.parseInt(note[3]);
+                String spaceOrLine = note[4];
+                int index = Integer.parseInt(note[5]);
+
+                notes.put(name, new Note(name, clefPref, trebleLedgers, bassLedgers, spaceOrLine,
+                        index));
+            }
+        }
+        catch (IOException e){
+            // do nothing
+        }
+
+        return notes;
     }
 }

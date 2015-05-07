@@ -1,8 +1,10 @@
 package eecs395.composr.ui;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 import java.util.Hashtable;
 import java.util.Set;
@@ -12,16 +14,7 @@ import eecs395.composr.R;
 
 public class UserInterfaceController {
 
-    /**
-     * Returns a button given its ID in R (the dynamically generated class which sets all of the
-     * public constants from the XML files)
-     *
-     * @param id The id of the button
-     * @return The button
-     */
-    public static Button getButton(int id){
-        return (Button) Composr.getNoteLayout().findViewById(id);
-    }
+
 
     /**
      * Returns a button given its ID in R (the dynamically generated class which sets all of the
@@ -36,18 +29,30 @@ public class UserInterfaceController {
         return (Button) parent.findViewById(id);
     }
 
+    /**
+     * Returns a button given its ID in R (the dynamically generated class which sets all of the
+     * public constants from the XML files)
+     *
+     * @param activity The activity
+     * @param id The id of the button
+     * @return The button
+     */
+    public static Button getButton(Activity activity, int id){
+        return (Button) activity.findViewById(id);
+    }
+
     public static void setButtonsEnabled(Button[] buttons, boolean enabled){
         for (Button b: buttons){
             b.setEnabled(enabled);
         }
     }
 
-    public static void addOnClickListeners(){
+    public static void addOnClickListeners(final Activity activity){
 
         final Button [] buttonsOnMainScreen = new Button[]{
-                getButton(R.id.settings),
-                getButton(R.id.share_button),
-                getButton(R.id.tools_button)};
+                getButton(activity, R.id.settings),
+                getButton(activity, R.id.share_button),
+                getButton(activity, R.id.tools_button)};
 
         final Dialog settingsDialog = Dialogs.createTopLevelDialog(
                 R.layout.settings,
@@ -65,16 +70,17 @@ public class UserInterfaceController {
 
         Hashtable<Button, View.OnClickListener> buttonsAndListeners =
                 new Hashtable<Button, View.OnClickListener>() {{
-                    put(getButton(R.id.settings), Listeners.showDialogListener(settingsDialog));
 
-                    put(getButton(R.id.Toggle),
-                            Listeners.getListenListener(buttonsOnMainScreen,
-                                    getButton(R.id.Toggle),
+                    put(getButton(activity, R.id.settings), Listeners.showDialogListener(settingsDialog));
+
+                    put(getButton(activity, R.id.Toggle),
+                            Listeners.getListenListener(activity, buttonsOnMainScreen,
+                                    getButton(activity, R.id.Toggle),
                                     Dialogs.createTimeSignatureDialog(settingsDialog)));
 
-                    put(getButton(R.id.share_button), Listeners.showDialogListener(shareDialog));
+                    put(getButton(activity, R.id.share_button), Listeners.showDialogListener(shareDialog));
 
-                    put(getButton(R.id.tools_button), Listeners.showDialogListener(toolsDialog));
+                    put(getButton(activity, R.id.tools_button), Listeners.showDialogListener(toolsDialog));
 
                     put(getButton(settingsDialog, R.id.tempo),
                             Listeners.showDialogListener(Dialogs.createTempoDialog(settingsDialog)));

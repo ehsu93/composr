@@ -4,10 +4,7 @@ import java.util.Hashtable;
 
 public class Symbols {
 
-    private Hashtable<String, String> symbols;
-
-    public Symbols(){
-        this.symbols = new Hashtable<String, String>() {{
+    private static Hashtable<String, String> symbols = new Hashtable<String, String>() {{
             put("trebleClef", "g");
             put("bassClef", "?");
 
@@ -32,7 +29,7 @@ public class Symbols {
             // rests
             put("wholeRest", "W");      // 16
             put("halfRest", "D");       // 8
-            put("halfRestdot", "H");    // 12
+            put("halfRestDot", "H");    // 12
             put("quarterRest", "Q");    // 4
             put("quarterRestDot", "J"); // 6
             put("eighthRest", "E");     // 2
@@ -55,9 +52,8 @@ public class Symbols {
             put("2/8", "k");
 
         }};
-    }
 
-    public String get(String key){
+    public static String get(String key){
         return symbols.get(key);
     }
 }

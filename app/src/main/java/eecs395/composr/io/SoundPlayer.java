@@ -53,15 +53,9 @@ public class SoundPlayer {
         }
     }
 
-    public static class Metronome {
-
-        /**
-         * Plays the ticking sound
-         */
-        public static void playTick(){
-            MediaPlayer m =  MediaPlayer.create(Composr.getContext(), R.raw.tick);
-            m.start();
-        }
+    public static void playTick(){
+        MediaPlayer m =  MediaPlayer.create(Composr.getContext(), R.raw.tick);
+        m.start();
     }
 
 }

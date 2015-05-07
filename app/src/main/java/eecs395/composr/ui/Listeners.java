@@ -1,5 +1,6 @@
 package eecs395.composr.ui;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.view.MotionEvent;
 import android.view.View;
@@ -9,8 +10,8 @@ import eecs395.composr.Composr;
 import eecs395.composr.R;
 import eecs395.composr.draw.Drawer;
 import eecs395.composr.io.EmailSender;
+import eecs395.composr.io.FileWriter;
 import eecs395.composr.io.SoundPlayer;
-import eecs395.composr.musicXML.PatternHandler;
 
 public class Listeners {
 
@@ -67,7 +68,8 @@ public class Listeners {
      * @param listenButton Indicates whether to stop or start listening
      * @return The OnClickListener for the Listen button
      */
-    public static View.OnClickListener getListenListener(final Button [] buttonsToDisable,
+    public static View.OnClickListener getListenListener(final Activity activity,
+                                                  final Button [] buttonsToDisable,
                                                   final Button listenButton,
                                                   final Dialog timeSignatureDialog){
         return new View.OnClickListener() {
@@ -79,18 +81,18 @@ public class Listeners {
                 // stop listening to the user
                 if (buttonText.equals("Stop Listening")) {
                     listenButton.setText("Listen");
-                    Composr.setListening(false);
+                    //Composr.setListening(false);
                     UserInterfaceController.setButtonsEnabled(buttonsToDisable, true);
                     Composr.getNoteLayout().setOnTouchListener(
                             getNoteLayoutListener(timeSignatureDialog));
-                    UserInterfaceController.getButton(R.id.makeMusic).performClick();
+                    Dialogs.promptForExportFilename();
                 }
 
                 // start listening to the user
                 else {
                     listenButton.setText("Stop Listening");
-                    Composr.setHasListened(true);
-                    Composr.setListening(true);
+                    //Composr.setHasListened(true);
+                    //Composr.setListening(true);
                     UserInterfaceController.setButtonsEnabled(buttonsToDisable, false);
                     Composr.getNoteLayout().setOnTouchListener(getEmptyOnTouchListener());
                 }
@@ -145,7 +147,7 @@ public class Listeners {
             public void onClick(View v){
 
                 // current pattern is not saved, prompt the user for a filename
-                if (!PatternHandler.isCurrentPatternSaved()) {
+                if (!FileWriter.hasBeenSaved()) {
                     EmailSender.setPendingEmail(true);
                     Dialogs.promptForExportFilename(); // this will call sendEmail() later
                 } else {

@@ -1,5 +1,7 @@
 package eecs395.composr;
 
+import android.util.Log;
+
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.Timer;
@@ -14,107 +16,119 @@ import eecs395.composr.process.RecordedNote;
 import eecs395.composr.process.SampleBeatPair;
 
 public class RecordingTask {
+    private int bpm;
+    private TimeSignature timeSignature;
 
-    // given as user inputs
-    int bpm;
-    TimeSignature timeSignature;
-    int samplesPerBeat;
+    // hard-coded default value
+    private int samplesPerBeat = 4;
 
+    //Flags with initial values:
+    private boolean countdownComplete = false;
+    private boolean recording = false;
+    private boolean drawCurrentNote = false;
+    private boolean drawBarline = false;
 
-    // initial values
-    boolean countdownComplete = false;
-    boolean recording = false;
+    private SampleBeatPair currentPosition;
+    private RecordedNote currentNote;
 
-    SampleBeatPair previousPosition;
-    SampleBeatPair currentPosition;
+    private FrequencyAnalyzer fa;
+    private RecordedFrequencies rf;
+    private Drawer d;
 
-    String previousPitch;
-    int sameNoteStreak = 0;
+    private Timer timer;
+    private TimerTask task;
 
-    // instances of other classes in the application
-    FrequencyAnalyzer fr;
-    RecordedFrequencies rf;
-    Drawer d;
+    //Indices to keep track of the place in the list of recorded frequencies
+    private int start;
+    private int end;
+    private int count;
 
-    // created by toggle
-    Timer timer;
-    TimerTask task;
-    public String pattern = "";
-    public String displayPattern = "";
+    private String status = "Not recording";
 
-    int start;
-    int end;
-    int count;
-
-    private static LinkedList<RecordedNote> recordedNotes;
+    private LinkedList<RecordedNote> recordedNotes;
 
     public RecordingTask(int tempo, TimeSignature timeSignature, Drawer d){
         this.bpm = tempo;
         this.timeSignature = timeSignature;
         this.d = d;
 
-        // determines the accuracy of the application
-        this.samplesPerBeat = 4;
-
-        this.fr = new FrequencyAnalyzer();
+        this.fa = new FrequencyAnalyzer();
         this.rf = new RecordedFrequencies();
 
         this.currentPosition = new SampleBeatPair(0, 0, 0);
-        this.start = 0;
-        this.previousPitch = "R";
+
+        start = 0;
+        count = 0;
+        end = 0;
 
         this.recordedNotes = new LinkedList<>();
     }
 
     public void addFreq(Float freq){
-        count++;
         rf.addFrequency(freq);
-
+        count++;
     }
 
     public TimerTask createTimerTask(){
         task = new TimerTask(){
-
             @Override
-            public void run() {
-                previousPosition = new SampleBeatPair(currentPosition);
-                incrementPosition();
-
-                if(countdownComplete){
-                    end = count;
-
-                    float median = rf.getMedian(start, end);
-                    
-                    String pitch = fr.getNoteFromFreq(median);
-
-                    if (pitch.equals(previousPitch)){
-                        sameNoteStreak++;
-                    } else {
-                        RecordedNote note = new RecordedNote(pitch, getDurationString(sameNoteStreak));
-
-                        sameNoteStreak = 0;
-
-                        previousPitch = pitch;
-                    }
-                    start = end;
-                }
-
-                else if (currentPosition.isNewBeat()){
-                    int countDown = timeSignature.getTop() - currentPosition.getBeat();
-                    displayPattern = ""+ countDown;
-
-                    if(currentPosition.isNewMeasure()) {
-                        displayPattern = "";
-                        countdownComplete = true;
-                    }
-                }
+            public void run(){
+                currentPosition.increment(samplesPerBeat, timeSignature.getTop());
 
                 if (currentPosition.isNewBeat()){
-                    SoundPlayer.Metronome.playTick();
+                    SoundPlayer.playTick();
+
+                    if (!countdownComplete){
+                        int countDown = timeSignature.getTop() - currentPosition.getBeat();
+
+                        status = "Starting recording in " + Integer.toString(countDown) + "...";
+
+                        if (currentPosition.isNewMeasure()){
+                            countdownComplete = true;
+                            currentNote = new RecordedNote("R", 0);
+                            currentPosition = new SampleBeatPair();
+                        }
+                    }
                 }
+
+                if (countdownComplete && !currentPosition.isFirst()) {
+                    status = "Recording";
+
+                    end = count;
+
+                    Log.i("composr-test", "start = " + Integer.toString(start) + ", end = " + Integer.toString(end));
+                    // this line is the costliest line in the method, only use in necessary cond.
+                    String pitch = fa.getNoteFromFreq(rf.getMedian(start, end));
+
+                    // the same note is continuing
+                    if (pitch.equals(currentNote.getPitch())){
+                        currentNote.incrementDuration();
+                    }
+
+                    // the note just ended
+                    else {
+                        recordedNotes.add(currentNote);
+                        currentNote = new RecordedNote(pitch);
+                        drawCurrentNote = true;
+                    }
+
+                    start = end;
+
+                    if (currentPosition.isNewMeasure()){
+                        drawCurrentNote = true;
+                        drawBarline = true;
+                    }
+
+                    updateDisplay();
+
+                    // reset current note
+                    currentNote = new RecordedNote(currentNote.getPitch());
+                }
+
 
             }
         };
+
         return task;
     }
 
@@ -122,7 +136,7 @@ public class RecordingTask {
         this.recording = !this.recording;
 
         if (this.recording){
-            resetPatterns();
+            resetDisplay();
 
             this.timer = new Timer();
             this.task = createTimerTask();
@@ -133,126 +147,35 @@ public class RecordingTask {
 
         else {
             fillCurrentMeasureWithRests();
-
             countdownComplete = false;
             timer.cancel();
             timer.purge();
+            status = "Not recording";
+        }
+
+    }
+
+    public void updateDisplay(){
+        if (drawCurrentNote){
+            d.draw(recordedNotes.getLast());
+            drawCurrentNote = false;
+        }
+
+        if (drawBarline) {
+            d.drawBarLine();
+            drawBarline = false;
         }
     }
 
-    public void updatePattern(String note, int duration){
-        String durationString = getDurationString(duration);
-        recordedNotes.add(new RecordedNote(note, durationString));
-    }
-
-    /**
-     * Update the pattern with a character but no duration (for barlines)
-     * @param note the character to update the pattern with
-     */
-    public void updatePattern(String note){
-        updatePattern(note, 0);
-    }
-
-    public String getDurationString(int duration){
-
-        // TODO: do this better
-        switch(duration){
-            case 1:
-                return "s";
-            case 2:
-                return "i";
-            case 3:
-                return "i.";
-            case 4:
-                return "q";
-            case 5:
-                return "qs"; // TODO find out what 5 samples should be
-            case 6:
-                return "q.";
-            case 7:
-                return "q.s"; // TODO ... 7 samples
-            case 8:
-                return "h";
-            case 9:
-                return "hs"; // TODO ... 9 samples
-            case 10:
-                return "hi"; // TODO... 10 samples
-            case 11:
-                return "hi."; // TODO... 11
-            case 12:
-                return "h.";
-            case 13:
-                return "hqs"; // TODO... 13
-            case 14:
-                return "hq."; // TODO... 14
-            case 15:
-                return "hq.s"; // TODO... 15
-            case 16:
-                return "w";
-        }
-
-        return "";
-
-    }
-
-    public void updateDisplay(RecordedNote recordedNote){
-        if (!recordedNote.getPitch().equals("R")){
-            // TODO find a different way to represent different length rests
-            d.drawRest(recordedNote.getDuration());
-        } else {
-            d.drawNote(recordedNote);
-        }
-
-        if (displayPattern.length() > 20) {
-            truncateDisplayPattern();
-        }
-    }
-
-    public void updateDisplayPattern(String note){
-        //updateDisplay(note, 1);
-    }
-
-    public void truncateDisplayPattern(){
-        displayPattern = displayPattern.substring(displayPattern.length() - 20, displayPattern.length());
-    }
-
-    public void resetPatterns(){
-        resetPattern();
-        resetDisplayPattern();
-    }
-
-    public void resetPattern(){
-        pattern = "";
-    }
-
-    public void resetDisplayPattern(){
-        displayPattern = "";
-    }
-
-    public void processEndOfMeasure(){
-        updatePattern("|");
-        updateDisplayPattern("|");
+    public void resetDisplay(){
+        d.reset();
     }
 
     public void fillCurrentMeasureWithRests(){
-        //TODO handle parts of a beat
-        while(currentPosition.getBeat() < timeSignature.getTop()) {
-            pattern += "R ";
-            currentPosition.incrementBeat();
-        }
-    }
+        int distanceTilEndOfMeasure = currentPosition.getDistanceTilEndOfMeasure(samplesPerBeat,
+                timeSignature.getTop());
 
-    public void incrementPosition(){
-        currentPosition.incrememntSample();
-
-        if (currentPosition.getSample() == samplesPerBeat){
-            currentPosition.incrementBeat();
-        }
-
-        if (currentPosition.getBeat() == timeSignature.getTop()){
-            currentPosition.incrementMeasure();
-            processEndOfMeasure();
-        }
+        d.draw(new RecordedNote("R", distanceTilEndOfMeasure));
     }
 
     public void setTimeSignature(TimeSignature timeSignature){
@@ -265,6 +188,28 @@ public class RecordingTask {
 
     public void updateTempo(int i){
         bpm = i;
+    }
+
+    public String generatePattern(){
+        String p = "";
+        for (RecordedNote recordedNote : recordedNotes){
+           for (RecordedNote n : recordedNote.divideNotes()){
+               p.concat(n.getPitch() + RecordedNote.getDurationString(n.getDuration()));
+           }
+        }
+        return p;
+    }
+
+    public String getNoteFromFreq(float pitch){
+        return fa.getNoteFromFreq(pitch);
+    }
+
+    public String getStatus(){
+        return status;
+    }
+
+    public boolean isRecording(){
+        return countdownComplete;
     }
 
 }

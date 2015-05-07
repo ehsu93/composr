@@ -16,7 +16,6 @@ import be.tarsos.dsp.pitch.PitchDetectionResult;
 import be.tarsos.dsp.pitch.PitchProcessor;
 
 import eecs395.composr.io.FileWriter;
-import eecs395.composr.musicXML.PatternHandler;
 import eecs395.composr.draw.Drawer;
 import eecs395.composr.musicUtils.TimeSignature;
 import eecs395.composr.ui.UserInterfaceController;
@@ -38,12 +37,9 @@ public class Composr extends Activity {
     /** Default number of beats per measure */
     private TimeSignature timeSignature = TimeSignature.FOUR_FOUR;
 
-
     /** Whether the program is currently listening to input */
-    private static boolean listening;
-    private static boolean hasListened;
-
-
+    //private static boolean listening;
+    //private static boolean hasListened;
 
     /**
      * Everything that happens when the application is first started
@@ -65,9 +61,9 @@ public class Composr extends Activity {
         // initialize RecordingTask object with default values
         rt = new RecordingTask(120, timeSignature, drawer);
 
-        UserInterfaceController.addOnClickListeners();
+        UserInterfaceController.addOnClickListeners(this);
 
-        hasListened = false;
+        //hasListened = false;
 
         // initialize audio dispatcher
         AudioDispatcher dispatcher = AudioDispatcherFactory.fromDefaultMicrophone(22050, 1024, 0);
@@ -107,9 +103,11 @@ public class Composr extends Activity {
             @Override
             public void handlePitch(PitchDetectionResult pitchDetectionResult, AudioEvent audioEvent) {
                 final float pitchInHz = pitchDetectionResult.getPitch();
-                final String note = rt.fr.getNoteFromFreq(pitchInHz);
+                final String note = rt.getNoteFromFreq(pitchInHz);
 
-                rt.addFreq(pitchInHz);
+                if (rt.isRecording()){
+                    rt.addFreq(pitchInHz);
+                }
 
                 runOnUiThread(new Runnable() {
                     @Override
@@ -120,34 +118,8 @@ public class Composr extends Activity {
                         TextView text2 = (TextView) findViewById(R.id.Note);
                         text2.setText("" + note);
 
-                        if (listening) {
-                            // check with current pattern in recording task
-                            String previousPattern = PatternHandler.getPreviousPatternString();
-
-                            if (!previousPattern.equals(rt.pattern) && !previousPattern.equals("")){
-                                int len = PatternHandler.getPreviousPatternString().length();
-                                boolean notDone = true;
-                                //Log.i("drawNoteTest", "pattern = " + previousPattern);
-                                while (notDone) {
-                                    int space = rt.pattern.indexOf(" ", len);
-                                    int nextSpace = rt.pattern.indexOf(" ", space + 1);
-
-                                    if (nextSpace == -1) {
-                                        nextSpace = rt.pattern.length();
-                                        notDone = false;
-                                    }
-
-                                    String nextPiece = rt.pattern.substring(space + 1, nextSpace);
-                                    len = nextSpace;
-                                    //Log.i("drawNoteTest", "next note to draw = [" + nextPiece + "]");
-                                    drawer.draw(nextPiece);
-                                }
-
-                                PatternHandler.setPreviousPatternString(rt.pattern);
-
-                            }
-                        }
-
+                        TextView text3 = (TextView) findViewById(R.id.Countdown);
+                        text3.setText("" + rt.getStatus());
                     }
                 });
             }
@@ -155,7 +127,7 @@ public class Composr extends Activity {
     }
 
     /**
-     * Initliaze the Drawer object
+     * Initialize the Drawer object
      */
     public void initializeDrawer(){
         drawer = new Drawer(this);
@@ -175,20 +147,11 @@ public class Composr extends Activity {
         return mContext;
     }
 
-    public static String getPatternString(){
-        return rt.pattern;
-    }
-
     public static void reset(){
-        /* Whether the user just started or just stopped recording, the current pattern has
-                not yet been saved, set currentPatternSaved to false*/
-        PatternHandler.setCurrentPatternSaved(false);
 
         // there is no last saved file at this time
         FileWriter.setLastSavedFile(null);
 
-        // reset previous pattern
-        PatternHandler.resetPreviousPattern();
 
         // start or stop the recording task
         rt.toggleRecordingTask();
@@ -214,13 +177,16 @@ public class Composr extends Activity {
         return noteLayout;
     }
 
-    public static void setListening(boolean input) { listening = input; }
+    //public static void setListening(boolean input) { listening = input; }
 
-    public static void setHasListened(boolean input) {
-        hasListened = input;
-    }
+    //public static void setHasListened(boolean input) {  hasListened = input; }
 
     public static void redraw(){
         drawer.redraw();
     }
+
+    public static String getPattern(){
+        return rt.generatePattern();
+    }
+
 }
