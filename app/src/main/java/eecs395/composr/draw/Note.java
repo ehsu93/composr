@@ -1,4 +1,6 @@
 package eecs395.composr.draw;
+import android.util.Log;
+
 import com.opencsv.CSVReader;
 
 import java.io.IOException;
@@ -89,17 +91,19 @@ public class Note {
      * @return The float value of where to place the note on the canvas
      */
     public float getPosition(String clef, int spaceBetweenLines){
-
+        return 250 - 25f * (index - 1);
+        /*
         // stem down notes are lower than stem up notes, calculate accordingly
         if (this.isStemDown(clef)){
             return (-0.5f * this.index + 9.45f) * spaceBetweenLines;
         } else {
-            return (-0.5f * this.index + 6.85f) * spaceBetweenLines;
-        }
+            //Log.i("composr-note-test", "note: " + name + ", pos: " + (25*this.index-49));
+            return 125;
+
+        }*/
     }
 
-    public String getSymbol(String clef, String duration){
-
+    public String getKey(String clef, String duration){
         String durationSubstring;
 
         // first part of the string, the length of the note plus the word note
@@ -123,8 +127,16 @@ public class Note {
             stemSubstring = "StemUp";
         }
 
+        return durationSubstring + stemSubstring;
+    }
+
+    public String getSymbol(String clef, String duration){
+
+        String key = getKey(clef, duration);
+        Log.i("composr-draw-test", key);
+
         // in the form of quarterNoteStemUp, grab this from the symbols hashtable
-        return symbols.get(durationSubstring + stemSubstring);
+        return Symbols.get(key);
     }
 
     /**
@@ -199,4 +211,6 @@ public class Note {
 
         return notes;
     }
+
+
 }

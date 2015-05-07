@@ -1,5 +1,7 @@
 package eecs395.composr.process;
 
+import android.util.Log;
+
 import java.util.LinkedList;
 
 import eecs395.composr.draw.Note;
@@ -114,6 +116,7 @@ public class RecordedNote {
 
         int firstDuration = getFirstDuration();
         int secondDuration = duration - getFirstDuration();
+        Log.i("composr-div-test", "duration = " + duration  + "first = " + firstDuration);
 
         dividedNotes.add(new RecordedNote(pitch, firstDuration));
         if (secondDuration != 0){

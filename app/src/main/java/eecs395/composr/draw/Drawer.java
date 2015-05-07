@@ -11,27 +11,18 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Typeface;
 import android.util.DisplayMetrics;
-import android.view.Display;
+import android.util.Log;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
-import android.widget.TextView;
 
-import com.opencsv.CSVReader;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.LinkedList;
-import java.util.List;
 
 import eecs395.composr.Composr;
-import eecs395.composr.R;
 import eecs395.composr.musicUtils.KeySignature;
 import eecs395.composr.musicUtils.TimeSignature;
 import eecs395.composr.process.RecordedNote;
-import eecs395.composr.ui.UserInterfaceController;
 
 public class Drawer extends View {
 
@@ -77,7 +68,7 @@ public class Drawer extends View {
     float offset;
 
     /** The amount to move the xCursor by after something is drawn on the canvas */
-    float X_INCREMENT = 50;
+    float X_INCREMENT = 100;
 
     /** The current x location at which to draw an object on the canvas */
     float xCursor;
@@ -89,6 +80,11 @@ public class Drawer extends View {
     //boolean scrolling;
 
     float xoffset = 0;
+    int noteIndex;
+
+    ArrayList<RecordedNote> notesToDraw;
+
+    boolean redraw = false;
 
     float[] trebleSharpHeights = {50, 125, 25, 100, 175, 75, 150};
     float[] trebleFlatHeights = {150, 75, 175, 100, 200, 125, 225};
@@ -125,6 +121,8 @@ public class Drawer extends View {
 
         // populates the notes hashtable
         notes = Note.getAllNotes();
+
+        notesToDraw = new ArrayList<>();
 
         Bitmap result = Bitmap.createBitmap(WIDTH, 400, Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(result);
@@ -166,10 +164,36 @@ public class Drawer extends View {
 
         drawInitial();
 
+
+        int drawnCount = 0;
+        for (int i = 0; i < noteIndex; i++){
+            RecordedNote n = notesToDraw.get(i);
+            draw(n);
+            drawnCount += n.getDuration();
+            if (drawnCount % 64 == 0){
+                drawBarLine();
+            }
+        }
+        //test();
+    }
+
+    public void test(){
+        //canvas.drawText("s", xCursor, 400, notePaint);
+        //drawNote(new RecordedNote("A5", 4));
+        //drawNote(new RecordedNote("A4", 2));
+        //drawNote(new RecordedNote("E4", 1));
+
+        //drawNote(new RecordedNote("E5", 1));
+        //drawNote(new RecordedNote("B4", 1));
+
+        //canvas.drawText("s", 200, 100, notePaint);
+        //canvas.drawText("s", 300, 125, notePaint); // b5
+        //canvas.drawText("s", 400, 150, notePaint); //
+        //canvas.drawText("s", 500, 175, notePaint); //
     }
 
     public void drawInitial(){
-        xCursor = PADDING_LEFT + xoffset;
+        xCursor = PADDING_LEFT - xoffset;
 
         drawStaff();
 
@@ -193,11 +217,17 @@ public class Drawer extends View {
      */
     public void draw(RecordedNote toDraw){
 
+
         if (toDraw.getPitch().equals("R")){
             drawRest(RecordedNote.getDurationString(toDraw.getDuration()));
         } else {
             drawNotes(toDraw);
         }
+    }
+
+
+    public void addNote(RecordedNote n){
+        notesToDraw.add(n);
     }
 
     public void drawNotes(RecordedNote recordedNote){
@@ -212,13 +242,30 @@ public class Drawer extends View {
     private void drawNote(RecordedNote recordedNote){
         Note note = notes.get(recordedNote.getPitch());
 
+        Log.i("composr-draw-test", RecordedNote.getDurationString(recordedNote.getDuration()));
+
         // get the symbol associated with a note of the given duration
-        String symbol = note.getSymbol(clef,
-                RecordedNote.getDurationString(recordedNote.getDuration()));
+        int x = recordedNote.getDuration();
+        String z =  RecordedNote.getDurationString(x);
+        String s = note.getSymbol(clef, z);
+
+        Log.i("composr-draw-test", s);
+        Log.i("composr-draw-test", "" + xCursor);
+        redraw = true;
+
+        //canvas.drawText("s", 400, 350, notePaint);
+
+        Log.i("composr-note-test", "name: " + note.getName() + ", pos: " + note.getPosition(clef, 0));
+
+        float y = note.getPosition(clef, SPACE_BETWEEN_LINES) + offset + PADDING_TOP;
+
+        if (recordedNote.getPitch().contains("#")){
+            canvas.drawText("B", xCursor, y, notePaint);
+            moveXCursor(60);
+        }
 
         // draw the note on the canvas
-        canvas.drawText(symbol, xCursor,
-                note.getPosition(clef, SPACE_BETWEEN_LINES) + offset + PADDING_TOP, notePaint);
+        canvas.drawText(s, xCursor, y, notePaint);
 
         moveXCursor();
     }
@@ -230,7 +277,9 @@ public class Drawer extends View {
      * @param duration The duration of the rest to be drawn
      */
     public void drawRest(String duration) {
-        canvas.drawText(Symbols.get("quarterRest"), xCursor, 250, notePaint);
+
+        String key = Symbols.durationToLongString(duration) + "Rest";
+        canvas.drawText(Symbols.get(key), xCursor , 250, notePaint);
         moveXCursor();
     }
 
@@ -238,7 +287,8 @@ public class Drawer extends View {
      * Draw a bar line on the canvas to separate different measures
      */
     public void drawBarLine(){
-        canvas.drawLine(xCursor, PADDING_TOP, xCursor, PADDING_TOP + 4 * SPACE_BETWEEN_LINES,
+        canvas.drawLine(xCursor , PADDING_TOP,
+                xCursor , PADDING_TOP + 4 * SPACE_BETWEEN_LINES,
                 staffPaint);
         moveXCursor();
     }
@@ -334,7 +384,12 @@ public class Drawer extends View {
 
         int i = 0;
         while (accidentals > i){
-            canvas.drawText(symbol, xCursor - 20, heights[i] + PADDING_TOP - 25, notePaint);
+
+            canvas.drawText(symbol,
+                    xCursor - 20 ,
+                    heights[i] + PADDING_TOP - 25,
+                    notePaint);
+
             moveXCursor(60);
             i++;
         }
@@ -382,10 +437,15 @@ public class Drawer extends View {
      * @param distance The distance to move the x cursor by
      */
     public void moveXCursor(float distance){
-        xCursor += distance;
+        if (xCursor >= 600){
+            xoffset += 20;
+        } else {
+            xCursor += distance;
+        }
     }
 
     public void redraw(){
+        noteIndex = notesToDraw.size();
         invalidate();
     }
 
@@ -394,7 +454,11 @@ public class Drawer extends View {
         Paint clearPaint = new Paint();
         clearPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.CLEAR));
         canvas.drawRect(0, 0, 0, 0, clearPaint);
+        xCursor = PADDING_LEFT;
+        notesToDraw = new ArrayList<>();
+        xoffset = 0;
 
         drawInitial();
     }
+
 }

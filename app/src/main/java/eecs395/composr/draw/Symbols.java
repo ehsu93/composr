@@ -23,8 +23,8 @@ public class Symbols {
             put("eighthNoteStemDown", "Ê");
             put("eighthNoteStemUp", "É");
 
-            put("sixteenthNoteStemDown", "");
-            put("sixteenthNoteStemUp", "");
+            put("sixteenthNoteStemDown", "s");
+            put("sixteenthNoteStemUp", "s");
 
             // rests
             put("wholeRest", "W");      // 16
@@ -33,8 +33,8 @@ public class Symbols {
             put("quarterRest", "Q");    // 4
             put("quarterRestDot", "J"); // 6
             put("eighthRest", "E");     // 2
-            put("eighthRestDot", "P");  // 3
-            put("sixteenthRest", "Z");  // 1
+            put("eighthRestDot", "I");  // 3
+            put("sixteenthRest", "S");  // 1
 
             // time signatures
             put("4/2", "K");
@@ -55,5 +55,13 @@ public class Symbols {
 
     public static String get(String key){
         return symbols.get(key);
+    }
+
+    public static String durationToLongString(String duration){
+        switch(duration){
+            case "s": return "sixteenth";
+            case "i": return "eighth";
+            default: return "quarter";
+        }
     }
 }

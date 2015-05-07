@@ -47,6 +47,8 @@ public class RecordingTask {
 
     private LinkedList<RecordedNote> recordedNotes;
 
+    boolean redraw = false;
+
     public RecordingTask(int tempo, TimeSignature timeSignature, Drawer d){
         this.bpm = tempo;
         this.timeSignature = timeSignature;
@@ -91,32 +93,37 @@ public class RecordingTask {
                     }
                 }
 
-                if (countdownComplete && !currentPosition.isFirst()) {
+                if (countdownComplete) {
                     status = "Recording";
 
                     end = count;
 
-                    Log.i("composr-test", "start = " + Integer.toString(start) + ", end = " + Integer.toString(end));
-                    // this line is the costliest line in the method, only use in necessary cond.
-                    String pitch = fa.getNoteFromFreq(rf.getMedian(start, end));
+                    if (start != end) {
 
-                    // the same note is continuing
-                    if (pitch.equals(currentNote.getPitch())){
-                        currentNote.incrementDuration();
+                        Log.i("composr-test", "start = " + Integer.toString(start) + ", end = " + Integer.toString(end));
+
+                        // this line is the costliest line in the method
+                        String pitch = fa.getNoteFromFreq(rf.getMedian(start, end));
+
+                        // the same note is continuing
+                        if (pitch.equals(currentNote.getPitch())) {
+                            currentNote.incrementDuration();
+                        }
+
+                        // the note just ended
+                        else {
+                            Log.i("composr-test", "New note: " + pitch + ", old note: " + currentNote.getPitch());
+                            recordedNotes.add(currentNote);
+                            currentNote = new RecordedNote(pitch);
+                            drawCurrentNote = true;
+                            redraw = true;
+                        }
+
+                        start = end;
                     }
 
-                    // the note just ended
                     else {
-                        recordedNotes.add(currentNote);
-                        currentNote = new RecordedNote(pitch);
-                        drawCurrentNote = true;
-                    }
-
-                    start = end;
-
-                    if (currentPosition.isNewMeasure()){
-                        drawCurrentNote = true;
-                        drawBarline = true;
+                        currentNote.incrementDuration();
                     }
 
                     updateDisplay();
@@ -156,14 +163,13 @@ public class RecordingTask {
     }
 
     public void updateDisplay(){
-        if (drawCurrentNote){
-            d.draw(recordedNotes.getLast());
-            drawCurrentNote = false;
-        }
+        Log.i("composr-test", "update display called");
+        if (recordedNotes.size() > 0) {
+            if (drawCurrentNote) {
+                d.addNote(recordedNotes.getLast());
+                drawCurrentNote = false;
+            }
 
-        if (drawBarline) {
-            d.drawBarLine();
-            drawBarline = false;
         }
     }
 
@@ -210,6 +216,14 @@ public class RecordingTask {
 
     public boolean isRecording(){
         return countdownComplete;
+    }
+
+    public void redraw(){
+        d.redraw();
+    }
+
+    public boolean needsRedraw(){
+        return redraw;
     }
 
 }

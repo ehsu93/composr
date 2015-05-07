@@ -113,6 +113,10 @@ public class Composr extends Activity {
                     @Override
                     public void run() {
 
+                        if (rt.needsRedraw()){
+                            rt.redraw();
+                        }
+
                         TextView text = (TextView) findViewById(R.id.Pitch);
                         text.setText("" + pitchInHz);
                         TextView text2 = (TextView) findViewById(R.id.Note);
